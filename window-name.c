@@ -23,7 +23,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		printf("%s\n", xcbh_win_title(conn, win));
+		printf("%s\n", xcbh_win_name(conn, win));
 	}
 
 	xcbh_conn_kill(&conn);

@@ -18,7 +18,9 @@ SRC = \
 	window-manage.c   \
 	window-ignore.c   \
 	window-exists.c   \
-	window-title.c
+	window-command.c   \
+	window-class.c   \
+	window-name.c
 
 OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)

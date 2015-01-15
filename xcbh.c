@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb.h>
+#include <xcb/xcb_icccm.h>
 
 #include "xcbh.h"
 
@@ -35,8 +36,9 @@ xcbh_screen_init(xcb_connection_t *conn, xcb_screen_t **screen)
 	}
 }
 
-int
-xcbh_win_exists(xcb_connection_t *conn, xcb_window_t win)
+
+xcb_get_window_attributes_reply_t *
+xcbh_win_attributes(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_window_attributes_cookie_t cookie;
 	xcb_get_window_attributes_reply_t  *reply;
@@ -44,11 +46,39 @@ xcbh_win_exists(xcb_connection_t *conn, xcb_window_t win)
 	cookie = xcb_get_window_attributes(conn, win);
 	reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
 
-	if (reply == NULL) {
+	return reply;
+}
+
+char *
+xcbh_win_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
+{
+	xcb_get_property_cookie_t cookie;
+	xcb_get_property_reply_t *reply;
+	char *value;
+
+	cookie = xcb_get_property(conn, 0, win,
+			prop, XCB_ATOM_STRING, 0L, 32L);
+	reply = xcb_get_property_reply(conn, cookie, NULL);
+	value = xcb_get_property_value(reply);
+
+	free(reply);
+
+	return value;
+}
+
+
+int
+xcbh_win_exists(xcb_connection_t *conn, xcb_window_t win)
+{
+	xcb_get_window_attributes_reply_t  *attr;
+
+	attr = xcbh_win_attributes(conn, win);
+
+	if (attr == NULL) {
 		return 0;
 	}
 
-	free(reply);
+	free(attr);
 
 	return 1;
 }
@@ -57,19 +87,17 @@ int
 xcbh_win_mapped(xcb_connection_t *conn, xcb_window_t win)
 {
 	int mapped;
-	xcb_get_window_attributes_cookie_t cookie;
-	xcb_get_window_attributes_reply_t  *reply;
+	xcb_get_window_attributes_reply_t  *attr;
 
-	cookie = xcb_get_window_attributes(conn, win);
-	reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
+	attr = xcbh_win_attributes(conn, win);
 
-	if (reply == NULL) {
+	if (attr == NULL) {
 		return 0;
 	}
 
-	mapped = reply->map_state;
+	mapped = attr->map_state;
 
-	free(reply);
+	free(attr);
 
 	return mapped == XCB_MAP_STATE_VIEWABLE;
 }
@@ -78,19 +106,17 @@ int
 xcbh_win_ignored(xcb_connection_t *conn, xcb_window_t win)
 {
 	int override;
-	xcb_get_window_attributes_cookie_t cookie;
-	xcb_get_window_attributes_reply_t  *reply;
+	xcb_get_window_attributes_reply_t  *attr;
 
-	cookie = xcb_get_window_attributes(conn, win);
-	reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
+	attr = xcbh_win_attributes(conn, win);
 
-	if (reply == NULL) {
+	if (attr == NULL) {
 		return 0;
 	}
 
-	override = reply->override_redirect;
+	override = attr->override_redirect;
 
-	free(reply);
+	free(attr);
 
 	return override;
 }
@@ -122,7 +148,7 @@ xcbh_win_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
 	uint32_t values[2];
 	uint32_t mask = XCB_CONFIG_WINDOW_X
-	              | XCB_CONFIG_WINDOW_Y;
+					| XCB_CONFIG_WINDOW_Y;
 
 	values[0] = x;
 	values[1] = y;
@@ -167,7 +193,6 @@ int
 xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 {
 	uint32_t childnum = 0;
-
 	xcb_query_tree_cookie_t cookie;
 	xcb_query_tree_reply_t *reply;
 
@@ -190,24 +215,22 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 	return childnum;
 }
 
-
+char *
+xcbh_win_name(xcb_connection_t *conn, xcb_window_t win)
+{
+	return xcbh_win_property(conn, win, XCB_ATOM_WM_NAME);
+}
 
 char *
-xcbh_win_title(xcb_connection_t *conn, xcb_window_t win)
+xcbh_win_class(xcb_connection_t *conn, xcb_window_t win)
 {
-	char *title;
-	xcb_get_property_cookie_t cookie;
-	xcb_get_property_reply_t *reply;
+	return xcbh_win_property(conn, win, XCB_ATOM_WM_CLASS);
+}
 
-	cookie = xcb_get_property(conn, 0, win,
-			XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 0L, 32L);
-	reply = xcb_get_property_reply(conn, cookie, NULL);
-
-	title = xcb_get_property_value(reply);
-
-	free(reply);
-
-	return title;
+char *
+xcbh_win_command(xcb_connection_t *conn, xcb_window_t win)
+{
+	return xcbh_win_property(conn, win, XCB_ATOM_WM_COMMAND);
 }
 
 xcb_window_t
