@@ -23,7 +23,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		if (!xcbh_win_mapped(conn, win)) {
+		if (xcbh_win_mapped(conn, win)) {
 			xcb_unmap_window(conn, win);
 		} else {
 			xcb_map_window(conn, win);

@@ -4,6 +4,7 @@ HDR = xcbh.h
 SRC = \
 	window-current.c   \
 	window-focus.c   \
+	window-close.c   \
 	window-size.c   \
 	window-position.c   \
 	window-geometry.c   \

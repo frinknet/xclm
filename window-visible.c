@@ -20,8 +20,8 @@ main(int argc, char **argv)
 
 	xcbh_conn_init(&conn);
 
-	while (*argv) {
-		win = strtoul(*argv++, NULL, 16);
+	while (*++argv) {
+		win = strtoul(*argv, NULL, 16);
 
 		if (!xcbh_win_mapped(conn, win)) {
 			xcbh_conn_kill(&conn);
