@@ -23,7 +23,7 @@ $(OBJ): $(HDR) xcbh.o
 
 .o:
 	@echo "LD $@"
-	@$(LD) $< util.o -o $@ $(LDFLAGS)
+	@$(LD) $< xcbh.o -o $@ $(LDFLAGS)
 
 .c.o:
 	@echo "CC $<"
