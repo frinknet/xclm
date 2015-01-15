@@ -3,6 +3,8 @@ include config.mk
 HDR = xcbh.h
 SRC = \
 	window-current.c   \
+	window-root.c   \
+	window-children.c   \
 	window-focus.c   \
 	window-kill.c   \
 	window-size.c   \

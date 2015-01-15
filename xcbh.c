@@ -255,6 +255,11 @@ xcbh_win_current(xcb_connection_t *conn)
 	return win;
 }
 
+xcb_window_t *
+xcbh_win_list(xcb_connection_t *conn)
+{
+}
+
 void
 xcbh_win_usage(char *name, char *params)
 {
