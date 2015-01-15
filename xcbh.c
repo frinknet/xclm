@@ -103,6 +103,38 @@ xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 	xcb_change_window_attributes(conn, win, mask, value);
 }
 
+void
+xcbh_win_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
+{
+	uint32_t values[3];
+	uint32_t mask = XCB_CONFIG_WINDOW_WIDTH
+	              | XCB_CONFIG_WINDOW_HEIGHT
+	              | XCB_CONFIG_WINDOW_STACK_MODE;
+
+	values[0] = width;
+	values[1] = height;
+	values[2] = XCB_STACK_MODE_ABOVE;
+
+	xcb_configure_window(conn, win, mask, values);
+
+	free(r);
+}
+
+void
+xcbh_win_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
+{
+	uint32_t values[2];
+	uint32_t mask = XCB_CONFIG_WINDOW_X
+	              | XCB_CONFIG_WINDOW_Y;
+
+	values[0] = x;
+	values[1] = y;
+
+	xcb_configure_window(conn, win, mask, values);
+
+	free(r);
+}
+
 int
 xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 {
@@ -130,6 +162,22 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 	return childnum;
 }
 
+xcb_get_geometry_reply_t
+xcbh_win_geometry(xcb_connection_t conn, xcb_window_t win)
+{
+	xcb_get_geometry_cookie_t cookie;
+	xcb_get_geometry_reply_t *reply;
+
+	cookie = xcb_get_geometry(conn, win);
+	reply = xcb_get_geometry_reply(conn, cookie, NULL);
+
+	if (!reply) {
+		errx(1, "center_pointer: missing geometry!");
+	}
+
+	return reply;
+}
+
 xcb_window_t
 xcbh_win_current(void)
 {
@@ -153,9 +201,27 @@ xcbh_win_current(void)
 }
 
 void
-xcbh_win_usage(char *name)
+xcbh_win_usage(char *name, char *params)
 {
-	fprintf(stderr, "usage: %s <wid> [wid..]\n", name);
+	fprintf(stderr, "usage: %s %s<wid> [wid..]", name, params);
 	exit(1);
 }
 
+void
+xcbh_pointer_center(xcb_connection_t conn, xcb_window_t win)
+{
+	uint32_t values[1];
+	xcb_get_geometry_reply_t *geom;
+
+	geom = xcbh_win_geometry(conn, win);
+
+	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0,
+			(geom->width  + (geom->border_width * 2)) / 2,
+			(geom->height + (geom->border_width * 2)) / 2);
+
+	values[0] = XCB_STACK_MODE_ABOVE;
+
+	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE, values);
+
+	free(geom);
+}
