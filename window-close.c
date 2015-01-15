@@ -23,7 +23,7 @@ main(int argc, char **argv)
 	while (*argv) {
 		win = strtoul(*argv++, NULL, 16);
 
-		xcb_unmap_window(conn, win);
+		xcb_kill_window(conn, win);
 	}
 
 	xcbh_conn_kill(&conn);
