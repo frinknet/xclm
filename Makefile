@@ -3,6 +3,7 @@ include config.mk
 HDR = xcbh.h
 SRC = \
 	window-current.c   \
+	window-focus.c   \
 	window-name.c
 
 OBJ = $(SRC:.c=.o)

@@ -1,9 +1,10 @@
 #include <err.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb.h>
 
-#include "util.h"
+#include "xcbh.h"
 
 void
 xcbh_conn_init(xcb_connection_t **conn)
@@ -94,6 +95,7 @@ xcbh_win_ignored(xcb_connection_t *conn, xcb_window_t win)
 	return override;
 }
 
+/*
 void
 xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
@@ -146,7 +148,7 @@ xcbh_win_redraw(xcb_connection_t *conn, xcb_window_t win, int x, int y, int widt
 	xcb_configure_window(conn, win, mask, values);
 }
 
-xcb_get_geometry_reply_t
+struct xcb_get_geometry_reply_t
 xcbh_win_geometry(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_geometry_cookie_t cookie;
@@ -182,7 +184,7 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 	memcpy(*list, xcb_query_tree_children(reply),
 			sizeof(xcb_window_t) * reply->children_len);
 
-	childnum = r->children_len;
+	childnum = reply->children_len;
 
 	free(reply);
 
@@ -190,6 +192,8 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 }
 
 
+
+*/
 char *
 xcbh_win_title(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -201,17 +205,15 @@ xcbh_win_title(xcb_connection_t *conn, xcb_window_t win)
 			XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 0L, 32L);
 	reply = xcb_get_property_reply(conn, cookie, NULL);
 
-	if (reply) {
-		title = xcb_get_property_value(reply);
+	title = xcb_get_property_value(reply);
 
-		free(reply);
-	}
+	free(reply);
 
 	return title;
 }
 
 xcb_window_t
-xcbh_win_current(void)
+xcbh_win_current(xcb_connection_t *conn)
 {
 	xcb_window_t win = 0;
 
@@ -235,10 +237,11 @@ xcbh_win_current(void)
 void
 xcbh_win_usage(char *name, char *params)
 {
-	fprintf(stderr, "usage: %s %s<wid> [wid..]", name, params);
+	fprintf(stderr, "usage: %s %s<wid> [wid..]\n", name, params);
 	exit(1);
 }
 
+/*
 void
 xcbh_pointer_center(xcb_connection_t conn, xcb_window_t win)
 {
@@ -257,3 +260,4 @@ xcbh_pointer_center(xcb_connection_t conn, xcb_window_t win)
 
 	free(geom);
 }
+*/

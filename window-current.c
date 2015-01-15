@@ -14,7 +14,7 @@ main(int argc, char **argv)
 {
 	xcbh_conn_init(&conn);
 
-	printf("0x%08x\n", xcbh_win_current());
+	printf("0x%08x\n", xcbh_win_current(conn));
 
 	xcbh_conn_kill(&conn);
 

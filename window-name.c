@@ -14,14 +14,14 @@ main(int argc, char **argv)
 {
 	xcb_window_t win = 0;
 
-	if (argc < 1) {
-		xcbh_win_usage(argv[0]);
+	if (argc < 2) {
+		xcbh_win_usage(argv[0], "");
 	}
 
 	xcbh_conn_init(&conn);
 
-	while (*argv) {
-		win = strtoul(*argv++, NULL, 16);
+	while (*++argv) {
+		win = strtoul(*argv, NULL, 16);
 
 		printf("%s\n", xcbh_win_title(conn, win));
 	}

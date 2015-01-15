@@ -12,7 +12,9 @@ int xcbh_win_ignored(xcb_connection_t *, xcb_window_t);
 int xcbh_win_ignore(xcb_connection_t *, xcb_window_t, int);
 int xcbh_win_children(xcb_connection_t *, xcb_window_t, xcb_window_t **);
 
+char *xcbh_win_title(xcb_connection_t *, xcb_window_t);
+
 xcb_window_t xcbh_win_current();
 
-void xcbh_win_usage();
+void xcbh_win_usage(char *, char *);
 #endif
