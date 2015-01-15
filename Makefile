@@ -2,27 +2,31 @@ include config.mk
 
 HDR = xcbh.h
 SRC = \
-	window-current.c   \
-	window-root.c   \
-	window-children.c   \
-	window-focus.c   \
-	window-kill.c   \
-	window-size.c   \
-	window-position.c   \
-	window-geometry.c   \
-	window-move.c   \
-	window-resize.c   \
-	window-redraw.c   \
-	window-show.c   \
-	window-hide.c   \
-	window-toggle.c   \
-	window-visible.c   \
-	window-manage.c   \
-	window-ignore.c   \
-	window-exists.c   \
-	window-command.c   \
-	window-class.c   \
-	window-name.c
+	window-current.c \
+	window-root.c \
+	window-focus.c \
+	window-kill.c \
+	window-size.c \
+	window-position.c \
+	window-geometry.c \
+	window-move.c \
+	window-resize.c \
+	window-redraw.c \
+	window-show.c \
+	window-hide.c \
+	window-toggle.c \
+	window-visible.c \
+	window-manage.c \
+	window-ignore.c \
+	window-exists.c \
+	window-command.c \
+	window-class.c \
+	window-name.c \
+	list-child-windows.c \
+	list-hidden-windows.c \
+	list-ignored-windows.c \
+	list-managed-windows.c \
+	list-visible-windows.c
 
 OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)

@@ -10,6 +10,7 @@
 static xcb_connection_t *conn;
 
 void print_children(xcb_window_t);
+void print_if_hidden(xcb_window_t);
 
 void
 print_children(xcb_window_t root)
@@ -19,7 +20,15 @@ print_children(xcb_window_t root)
 	xcbh_win_children(conn, root, &win);
 
 	while (*win++) {
-		printf("0x%08x\n", *win);
+		print_if_hidden(*win);
+	}
+}
+
+void
+print_if_hidden(xcb_window_t win)
+{
+	if (!xcbh_win_mapped(conn, win)) {
+		printf("0x%08x\n", win);
 	}
 }
 
@@ -38,6 +47,7 @@ main(int argc, char **argv)
 		win = strtoul(*argv, NULL, 16);
 
 		print_children(win);
+
 	}
 
 	xcbh_conn_kill(&conn);
