@@ -8,7 +8,8 @@ void xcbh_screen_init(xcb_connection_t *, xcb_screen_t **);
 
 int xcbh_win_exists(xcb_connection_t *, xcb_window_t);
 int xcbh_win_mapped(xcb_connection_t *, xcb_window_t);
-int xcbh_win_ignore(xcb_connection_t *, xcb_window_t);
+int xcbh_win_ignored(xcb_connection_t *, xcb_window_t);
+int xcbh_win_ignore(xcb_connection_t *, xcb_window_t, int);
 int xcbh_win_children(xcb_connection_t *, xcb_window_t, xcb_window_t **);
 
 xcb_window_t xcbh_win_current();

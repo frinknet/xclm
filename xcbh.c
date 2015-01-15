@@ -74,7 +74,7 @@ xcbh_win_mapped(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win)
+xcbh_win_ignored(xcb_connection_t *conn, xcb_window_t win)
 {
 	int override;
 	xcb_get_window_attributes_cookie_t cookie;
@@ -92,6 +92,15 @@ xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win)
 	free(reply);
 
 	return override;
+}
+
+void
+xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
+{
+	uint32_t mask = XCB_CW_OVERRIDE_REDIRECT;
+	uint32_t value[] = { override };
+
+	xcb_change_window_attributes(conn, win, mask, value);
 }
 
 int
@@ -121,7 +130,7 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 	return childnum;
 }
 
-static xcb_window_t
+xcb_window_t
 xcbh_win_current(void)
 {
 	xcb_window_t win = 0;
@@ -143,7 +152,7 @@ xcbh_win_current(void)
 	return win;
 }
 
-static void
+void
 xcbh_win_usage(char *name)
 {
 	fprintf(stderr, "usage: %s <wid> [wid..]\n", name);
