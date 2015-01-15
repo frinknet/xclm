@@ -4,7 +4,7 @@ HDR = xcbh.h
 SRC = \
 	window-current.c   \
 	window-focus.c   \
-	window-close.c   \
+	window-kill.c   \
 	window-size.c   \
 	window-position.c   \
 	window-geometry.c   \
@@ -15,7 +15,10 @@ SRC = \
 	window-hide.c   \
 	window-toggle.c   \
 	window-visible.c   \
-	window-name.c
+	window-manage.c   \
+	window-ignore.c   \
+	window-exists.c   \
+	window-title.c
 
 OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)

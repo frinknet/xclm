@@ -95,7 +95,6 @@ xcbh_win_ignored(xcb_connection_t *conn, xcb_window_t win)
 	return override;
 }
 
-/*
 void
 xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
@@ -104,7 +103,6 @@ xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 
 	xcb_change_window_attributes(conn, win, mask, value);
 }
-*/
 
 void
 xcbh_win_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
