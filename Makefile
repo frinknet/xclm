@@ -15,7 +15,6 @@ SRC = \
 	window-show.c \
 	window-hide.c \
 	window-toggle.c \
-	window-visible.c \
 	window-manage.c \
 	window-ignore.c \
 	window-exists.c \
@@ -26,7 +25,11 @@ SRC = \
 	list-hidden-windows.c \
 	list-ignored-windows.c \
 	list-managed-windows.c \
-	list-visible-windows.c
+	list-visible-windows.c \
+	is-window-ignored.c \
+	is-window-managed.c \
+	is-window-hidden.c \
+	is-window-visible.c
 
 OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)
