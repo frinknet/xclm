@@ -106,18 +106,14 @@ xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 void
 xcbh_win_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
 {
-	uint32_t values[3];
+	uint32_t values[2];
 	uint32_t mask = XCB_CONFIG_WINDOW_WIDTH
-	              | XCB_CONFIG_WINDOW_HEIGHT
-	              | XCB_CONFIG_WINDOW_STACK_MODE;
+					| XCB_CONFIG_WINDOW_HEIGHT;
 
 	values[0] = width;
 	values[1] = height;
-	values[2] = XCB_STACK_MODE_ABOVE;
 
 	xcb_configure_window(conn, win, mask, values);
-
-	free(r);
 }
 
 void
@@ -131,8 +127,39 @@ xcbh_win_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 	values[1] = y;
 
 	xcb_configure_window(conn, win, mask, values);
+}
 
-	free(r);
+void
+xcbh_win_redraw(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
+{
+	uint32_t values[4];
+	uint32_t mask = XCB_CONFIG_WINDOW_X
+					| XCB_CONFIG_WINDOW_Y
+					| XCB_CONFIG_WINDOW_WIDTH
+					| XCB_CONFIG_WINDOW_HEIGHT;
+
+	values[0] = x;
+	values[1] = y;
+	values[2] = width;
+	values[3] = height;
+
+	xcb_configure_window(conn, win, mask, values);
+}
+
+xcb_get_geometry_reply_t
+xcbh_win_geometry(xcb_connection_t *conn, xcb_window_t win)
+{
+	xcb_get_geometry_cookie_t cookie;
+	xcb_get_geometry_reply_t *reply;
+
+	cookie = xcb_get_geometry(conn, win);
+	reply = xcb_get_geometry_reply(conn, cookie, NULL);
+
+	if (!reply) {
+		errx(1, "center_pointer: missing geometry!");
+	}
+
+	return reply;
 }
 
 int
@@ -160,22 +187,6 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 	free(reply);
 
 	return childnum;
-}
-
-xcb_get_geometry_reply_t
-xcbh_win_geometry(xcb_connection_t conn, xcb_window_t win)
-{
-	xcb_get_geometry_cookie_t cookie;
-	xcb_get_geometry_reply_t *reply;
-
-	cookie = xcb_get_geometry(conn, win);
-	reply = xcb_get_geometry_reply(conn, cookie, NULL);
-
-	if (!reply) {
-		errx(1, "center_pointer: missing geometry!");
-	}
-
-	return reply;
 }
 
 xcb_window_t
