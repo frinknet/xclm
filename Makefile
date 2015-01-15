@@ -7,6 +7,13 @@ SRC = \
 	window-size.c   \
 	window-position.c   \
 	window-geometry.c   \
+	window-move.c   \
+	window-resize.c   \
+	window-redraw.c   \
+	window-show.c   \
+	window-hide.c   \
+	window-toggle.c   \
+	window-visible.c   \
 	window-name.c
 
 OBJ = $(SRC:.c=.o)

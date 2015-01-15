@@ -11,6 +11,11 @@ int xcbh_win_mapped(xcb_connection_t *, xcb_window_t);
 int xcbh_win_ignored(xcb_connection_t *, xcb_window_t);
 int xcbh_win_ignore(xcb_connection_t *, xcb_window_t, int);
 
+void xcbh_win_move(xcb_connection_t *, xcb_window_t, int, int);
+void xcbh_win_resize(xcb_connection_t *, xcb_window_t, int, int);
+void xcbh_win_redraw(xcb_connection_t *, xcb_window_t, int, int, int, int);
+
+
 xcb_get_geometry_reply_t *xcbh_win_geometry(xcb_connection_t *, xcb_window_t);
 int xcbh_win_children(xcb_connection_t *, xcb_window_t, xcb_window_t **);
 

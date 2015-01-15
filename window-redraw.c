@@ -8,17 +8,14 @@
 #include "xcbh.h"
 
 static xcb_connection_t *conn;
-static xcb_screen_t *screen;
-
-static void resize(xcb_window_t, int, int);
 
 int
 main(int argc, char **argv)
 {
-	int x, y;
+	int x, y, width, height;
 	xcb_window_t win;
 
-	if (argc < 3) {
+	if (argc < 6) {
 		xcbh_win_usage(argv[0], "<x> <y> <width> <height> ");
 	}
 
@@ -26,9 +23,11 @@ main(int argc, char **argv)
 
 	x = atoi(*(++argv));
 	y = atoi(*(++argv));
+	width = atoi(*(++argv));
+	height = atoi(*(++argv));
 
-	while (*argv) {
-		win = strtoul(*argv++, NULL, 16);
+	while (*++argv) {
+		win = strtoul(*argv, NULL, 16);
 
 		xcbh_win_redraw(conn, win, x, y, width, height);
 	}

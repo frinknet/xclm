@@ -8,9 +8,6 @@
 #include "xcbh.h"
 
 static xcb_connection_t *conn;
-static xcb_screen_t *screen;
-
-static void resize(xcb_window_t, int, int);
 
 int
 main(int argc, char **argv)
@@ -18,7 +15,7 @@ main(int argc, char **argv)
 	int x, y;
 	xcb_window_t win;
 
-	if (argc < 3) {
+	if (argc < 4) {
 		xcbh_win_usage(argv[0], "<x> <y> ");
 	}
 
@@ -27,8 +24,8 @@ main(int argc, char **argv)
 	x = atoi(*(++argv));
 	y = atoi(*(++argv));
 
-	while (*argv) {
-		win = strtoul(*argv++, NULL, 16);
+	while (*++argv) {
+		win = strtoul(*argv, NULL, 16);
 
 		xcbh_win_move(conn, win, x, y);
 	}
