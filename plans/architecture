@@ -1,0 +1,94 @@
+elegacy decorate
+elegacy events
+elegacy hotkeys
+elegacy autostart
+elegacy session
+elegacy trigger
+elegacy desktop
+elegacy window
+
+
+frames styles
+- maximized
+- floating
+- vertical scrolling
+- horizontal scrolling
+- vertical buttons
+- horizontal buttons
+- top tabs
+- right tabs
+- bottom tabs
+- left tabs
+- horizontal icons
+- vertical icons
+
+desktop
+	frames
+		windows
+
+
+There is one daemon connected to xcb
+commands are passed through zeromq to the control daemon
+
+elegacy
+script for controlling elegacy
+
+if called without anything resorts to calling:
+elegacy decorate
+elegacy events
+elegacy hotkeys
+elegacy autostart
+elegacy session
+
+elegacy trigger
+elegacy desktop
+elegacy window
+
+elegacy decorate
+modified z3bratabs/swm
+
+should have rounded window decorations
+should have two borders (outline, border)
+should have titlebars on any side
+
+elegacy events
+modified wmutils/opt/wew
+
+elegacy-events events/dir
+
+events/xorg/event/script
+
+should check to make sure scripts are executable
+should fork for each script to allow parallelism
+
+
+elegacy-hotkeys
+shell script to control hotke
+
+keys/term-$combo
+keys/xorg-$combo
+
+controls
+	baskerville/sxhkd
+	baskerville/shkd
+	z3bratabs/wendy
+
+rebuild keyboard output based on file structure
+
+
+elegacy autostart
+	calls scripts:
+autostart/*
+
+
+elegacy session
+a modified form off terminator window session
+
+
+elegacy trigger event $WID
+triggers an event for the given window
+if the event is not an xcb event only the event scripts are trigger
+else this calls the xcb event and the normal elegacy events daemon executes the
+script
+
+
