@@ -189,6 +189,27 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 	return childnum;
 }
 
+
+char *
+xcbh_win_title(xcb_connection_t *conn, xcb_window_t win)
+{
+	char *title;
+	xcb_get_property_cookie_t cookie;
+	xcb_get_property_reply_t *reply;
+
+	cookie = xcb_get_property(conn, 0, win,
+			XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 0L, 32L);
+	reply = xcb_get_property_reply(conn, cookie, NULL);
+
+	if (reply) {
+		title = xcb_get_property_value(reply);
+
+		free(reply);
+	}
+
+	return title;
+}
+
 xcb_window_t
 xcbh_win_current(void)
 {
