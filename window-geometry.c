@@ -15,14 +15,14 @@ main(int argc, char **argv)
 	xcb_window_t win;
 	xcb_get_geometry_reply_t *geom;
 
-	if (argc < 1) {
-		xcbh_win_usage(argv[0]);
+	if (argc < 2) {
+		xcbh_win_usage(argv[0], "");
 	}
 
 	xcbh_conn_init(&conn);
 
-	while (*argv) {
-		win = strtoul(*argv++, NULL, 16);
+	while (*++argv) {
+		win = strtoul(*argv, NULL, 16);
 		geom = xcbh_win_geometry(conn, win);
 
 		printf("%d %d %d %d\n", geom->x, geom->y, geom->width, geom->height);

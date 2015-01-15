@@ -4,6 +4,9 @@ HDR = xcbh.h
 SRC = \
 	window-current.c   \
 	window-focus.c   \
+	window-size.c   \
+	window-position.c   \
+	window-geometry.c   \
 	window-name.c
 
 OBJ = $(SRC:.c=.o)

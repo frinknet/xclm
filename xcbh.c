@@ -147,8 +147,9 @@ xcbh_win_redraw(xcb_connection_t *conn, xcb_window_t win, int x, int y, int widt
 
 	xcb_configure_window(conn, win, mask, values);
 }
+*/
 
-struct xcb_get_geometry_reply_t
+xcb_get_geometry_reply_t *
 xcbh_win_geometry(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_geometry_cookie_t cookie;
@@ -193,7 +194,6 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 
 
 
-*/
 char *
 xcbh_win_title(xcb_connection_t *conn, xcb_window_t win)
 {
