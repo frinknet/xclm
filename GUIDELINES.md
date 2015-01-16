@@ -35,7 +35,13 @@ returns 1 on error otherwise 0
 List by Association
 -------------------
 
-	list-noun-nouns ids
+	noun-get-noun ids
+
+given ids are of the first noun type
+prints one associated id per line
+returns 1 on error otherwise 0
+
+	noun-get-nouns ids
 
 given ids are of the first noun type
 prints one line for each id with ids of the second noun type

@@ -18,8 +18,10 @@ print_parents(xcb_window_t win)
 	while (win != screen->root) {
 		win = xcbh_win_parent(conn, win);
 
-		printf("0x%08x\n", win);
+		printf("0x%08x ", win);
 	}
+
+	print("\n");
 }
 
 int
