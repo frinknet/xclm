@@ -17,6 +17,7 @@ int xcbh_win_mapped(xcb_connection_t *, xcb_window_t);
 int xcbh_win_ignored(xcb_connection_t *, xcb_window_t);
 int xcbh_win_children(xcb_connection_t *, xcb_window_t, xcb_window_t **);
 
+xcb_window_t xcbh_win_parent(xcb_connection_t *, xcb_window_t);
 xcb_get_geometry_reply_t *xcbh_win_geometry(xcb_connection_t *, xcb_window_t);
 xcb_get_window_attributes_reply_t *xcbh_win_attributes(xcb_connection_t *, xcb_window_t);
 

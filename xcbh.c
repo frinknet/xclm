@@ -224,6 +224,27 @@ xcbh_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 	return childnum;
 }
 
+xcb_window_t
+xcbh_win_parent(xcb_connection_t *conn, xcb_window_t win)
+{
+	xcb_window_t parent;
+	xcb_query_tree_cookie_t cookie;
+	xcb_query_tree_reply_t *reply;
+
+	cookie = xcb_query_tree(conn, win);
+	reply = xcb_query_tree_reply(conn, cookie, NULL);
+
+	if (reply == NULL) {
+		errx(1, "0x%08x: no such window", win);
+	}
+
+	parent = reply->parent;
+
+	free(reply);
+
+	return parent;
+}
+
 char *
 xcbh_win_name(xcb_connection_t *conn, xcb_window_t win)
 {
