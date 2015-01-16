@@ -22,7 +22,7 @@ print_children(xcb_window_t root)
 		printf("0x%08x ", *win);
 	}
 
-	print("\n");
+	printf("%s\n", "");
 }
 
 int

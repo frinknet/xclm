@@ -21,7 +21,7 @@ print_parents(xcb_window_t win)
 		printf("0x%08x ", win);
 	}
 
-	print("\n");
+	printf("%s\n", "");
 }
 
 int
