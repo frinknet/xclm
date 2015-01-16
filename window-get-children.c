@@ -19,8 +19,10 @@ print_children(xcb_window_t root)
 	xcbh_win_children(conn, root, &win);
 
 	while (*win++) {
-		printf("0x%08x\n", *win);
+		printf("0x%08x ", *win);
 	}
+
+	print("\n");
 }
 
 int

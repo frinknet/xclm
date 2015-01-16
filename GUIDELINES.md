@@ -11,6 +11,16 @@ Commands are comprised of the following components
  - verbed = identify that a manipulation was performed
  - adverbs = information nececary to manipulate
  - ids = one or more id of a noun
+ - prop = property to display
+
+
+Get Property
+------------
+
+	noun-get-prop ids
+
+prints one line of information per id
+returns 1 on error otherwise 0
 
 
 Setting information
@@ -18,26 +28,17 @@ Setting information
 
 	noun-verb adverbs ids
 
-prints one line of information per id
-returns 1 on error otherwise 0
-
-
-Testing Information
--------------------
-
-	is-noun-verbed ids
-
 prints nothing
-returns 1 or 0 depending on check
+returns 1 on error otherwise 0
 
 
 List by Association
 -------------------
 
-	list-noun-nouns ids
+	noun-get-nouns ids
 
-ids are of the first noun type
-prints ids of the second noun type
+given ids are of the first noun type
+prints one line for each id with ids of the second noun type
 returns 1 on error otherwise 0
 
 
@@ -48,6 +49,15 @@ List by Status
 
 prints ids of the nouns affected
 returns 1 on error otherwise 0
+
+
+Testing Status
+--------------
+
+	is-noun-verbed ids
+
+prints nothing
+returns 1 or 0 depending on check
 
 
 
