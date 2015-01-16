@@ -14,7 +14,7 @@ main(int argc, char **argv)
 {
 	xcb_window_t win;
 
-	if (argc < 4) {
+	if (argc < 2) {
 		xcbh_win_usage(argv[0], "");
 	}
 
@@ -23,7 +23,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbh_win_move(conn, win, XCB_STACK_MODE_BELOW);
+		xcbh_win_stack(conn, win, XCB_STACK_MODE_BELOW);
 	}
 
 	xcbh_conn_kill(&conn);
