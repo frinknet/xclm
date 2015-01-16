@@ -21,6 +21,8 @@ SRC = \
 	window-command.c \
 	window-class.c \
 	window-name.c \
+	window-raise.c \
+	window-lower.c \
 	list-child-windows.c \
 	list-hidden-windows.c \
 	list-ignored-windows.c \

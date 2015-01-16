@@ -6,6 +6,7 @@ void xcbh_conn_kill(xcb_connection_t **);
 
 void xcbh_screen_init(xcb_connection_t *, xcb_screen_t **);
 
+void xcbh_win_stack(xcb_connection_t *, xcb_window_t, uint32_t);
 void xcbh_win_ignore(xcb_connection_t *, xcb_window_t, int);
 void xcbh_win_move(xcb_connection_t *, xcb_window_t, int, int);
 void xcbh_win_resize(xcb_connection_t *, xcb_window_t, int, int);

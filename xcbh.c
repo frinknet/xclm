@@ -131,6 +131,15 @@ xcbh_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 }
 
 void
+xcbh_win_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
+{
+	uint32_t mask = XCB_CONFIG_WINDOW_STACK_MODE;
+	uint32_t value[] = { stack };
+
+	xcb_configure_window(conn, win, mask, value);
+}
+
+void
 xcbh_win_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
 {
 	uint32_t values[2];
