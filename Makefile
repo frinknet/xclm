@@ -24,6 +24,7 @@ SRC = \
 	window-get-parents.c \
 	window-get-root.c \
 	window-get-children.c \
+	monitor-get-root.c \
 	list-focused-windows.c \
 	list-hidden-windows.c \
 	list-ignored-windows.c \
