@@ -2,6 +2,8 @@ include config.mk
 
 HDR = xcbh.h
 SRC = \
+	current-window.c \
+	current-root.c \
 	window-focus.c \
 	window-kill.c \
 	window-move.c \
