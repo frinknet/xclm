@@ -4,9 +4,6 @@ HDR = xcbh.h
 SRC = \
 	window-focus.c \
 	window-kill.c \
-	window-size.c \
-	window-position.c \
-	window-geometry.c \
 	window-move.c \
 	window-resize.c \
 	window-redraw.c \
@@ -15,16 +12,19 @@ SRC = \
 	window-toggle.c \
 	window-manage.c \
 	window-ignore.c \
-	window-command.c \
-	window-class.c \
-	window-name.c \
 	window-raise.c \
 	window-lower.c \
-	window-parent.c \
+	window-get-size.c \
+	window-get-position.c \
+	window-get-geometry.c \
+	window-get-command.c \
+	window-get-class.c \
+	window-get-name.c \
+	window-get-parent.c \
+	window-get-parents.c \
+	window-get-root.c \
+	window-get-children.c \
 	list-focused-windows.c \
-	list-root-windows.c \
-	list-child-windows.c \
-	list-parent-windows.c \
 	list-hidden-windows.c \
 	list-ignored-windows.c \
 	list-managed-windows.c \
