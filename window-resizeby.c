@@ -12,7 +12,7 @@ static xcb_connection_t *conn;
 int
 main(int argc, char **argv)
 {
-	int x, y, width, height;
+	int width, height;
 	xcb_window_t win;
 	xcb_get_geometry_reply_t *geom;
 
