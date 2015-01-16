@@ -8,6 +8,19 @@
 #include "xcbh.h"
 
 static xcb_connection_t *conn;
+static xcb_screen_t *screen;
+
+void print_parents(xcb_window_t);
+
+void
+print_parents(xcb_window_t win)
+{
+	while (win != screen->root) {
+		win = xcbh_win_parent(conn, win);
+
+		printf("0x%08x\n", win);
+	}
+}
 
 int
 main(int argc, char **argv)
@@ -19,11 +32,12 @@ main(int argc, char **argv)
 	}
 
 	xcbh_conn_init(&conn);
+	xcbh_screen_init(conn, &screen);
 
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		printf("0x%08x\n", xcbh_win_parent(conn, win));
+		print_parents(win);
 	}
 
 	xcbh_conn_kill(&conn);
