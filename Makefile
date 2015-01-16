@@ -8,6 +8,8 @@ SRC = \
 	window-kill.c \
 	window-move.c \
 	window-resize.c \
+	window-moveby.c \
+	window-resizeby.c \
 	window-redraw.c \
 	window-show.c \
 	window-hide.c \
