@@ -33,6 +33,8 @@ SRC = \
 	is-window-ignored.c \
 	is-window-managed.c \
 	is-window-hidden.c \
+	is-window-class.c \
+	is-window-command.c \
 	is-window-visible.c
 
 OBJ = $(SRC:.c=.o)
