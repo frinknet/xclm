@@ -22,13 +22,15 @@ print_children(xcb_window_t root)
 	while (*win++) {
 		print_if_visible(*win);
 	}
+
+	printf("%s", "\n");
 }
 
 void
 print_if_visible(xcb_window_t win)
 {
 	if (xcbh_win_mapped(conn, win) && !xcbh_win_ignored(conn, win)) {
-		printf("0x%08x\n", win);
+		printf("0x%08x", win);
 	}
 }
 
@@ -47,7 +49,6 @@ main(int argc, char **argv)
 		win = strtoul(*argv, NULL, 16);
 
 		print_children(win);
-
 	}
 
 	xcbh_conn_kill(&conn);
