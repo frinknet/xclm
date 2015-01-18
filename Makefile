@@ -4,13 +4,15 @@ HDR = xcbh.h
 SRC = \
 	current-window.c \
 	current-root.c \
+	monitor-get-root.c \
 	window-focus.c \
 	window-kill.c \
 	window-move.c \
 	window-resize.c \
+	window-warp.c \
 	window-moveby.c \
 	window-resizeby.c \
-	window-redraw.c \
+	window-warpby.c \
 	window-show.c \
 	window-hide.c \
 	window-toggle.c \
@@ -25,15 +27,15 @@ SRC = \
 	window-get-class.c \
 	window-get-name.c \
 	window-get-parent.c \
-	window-get-parents.c \
 	window-get-root.c \
-	window-get-children.c \
-	monitor-get-root.c \
-	list-focused-windows.c \
-	list-hidden-windows.c \
-	list-ignored-windows.c \
-	list-managed-windows.c \
-	list-visible-windows.c \
+	window-list-ignored.c \
+	window-list-managed.c \
+	window-list-visible.c \
+	window-list-hidden.c \
+	window-list-focused.c \
+	window-list-unfocused.c \
+	window-list-children.c \
+	window-list-parents.c \
 	window-is-ignored.c \
 	window-is-managed.c \
 	window-is-hidden.c \

@@ -166,7 +166,7 @@ xcbh_win_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 }
 
 void
-xcbh_win_redraw(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
+xcbh_win_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
 {
 	uint32_t values[4];
 	uint32_t mask = XCB_CONFIG_WINDOW_X
