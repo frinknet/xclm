@@ -17,7 +17,7 @@ main(int argc, char **argv)
 	char *command = "";
 
 	if (argc < 3) {
-		xcbh_win_usage(argv[0], "<command> ");
+		xcbh_win_usage(argv[0], "command");
 	}
 
 	xcbh_conn_init(&conn);

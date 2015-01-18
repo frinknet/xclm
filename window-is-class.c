@@ -17,7 +17,7 @@ main(int argc, char **argv)
 	char *class = "";
 
 	if (argc < 3) {
-		xcbh_win_usage(argv[0], "<class> ");
+		xcbh_win_usage(argv[0], "class");
 	}
 
 	xcbh_conn_init(&conn);

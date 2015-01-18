@@ -16,7 +16,7 @@ main(int argc, char **argv)
 	xcb_window_t win;
 
 	if (argc < 4) {
-		xcbh_win_usage(argv[0], "<x> <y> ");
+		xcbh_win_usage(argv[0], "x y");
 	}
 
 	xcbh_conn_init(&conn);

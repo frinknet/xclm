@@ -33,5 +33,6 @@ char *xcbh_win_command(xcb_connection_t *, xcb_window_t);
 xcb_window_t xcbh_win_current();
 
 void xcbh_win_usage(char *, char *);
+void xcbh_usage(char *, char *);
 void xcbh_show_header();
 #endif

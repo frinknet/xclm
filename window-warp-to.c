@@ -16,7 +16,7 @@ main(int argc, char **argv)
 	xcb_window_t win;
 
 	if (argc < 6) {
-		xcbh_win_usage(argv[0], "<x> <y> <width> <height> ");
+		xcbh_win_usage(argv[0], "x y width height ");
 	}
 
 	xcbh_conn_init(&conn);

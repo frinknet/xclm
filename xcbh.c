@@ -289,8 +289,24 @@ xcbh_win_current(xcb_connection_t *conn)
 void
 xcbh_win_usage(char *name, char *params)
 {
+	char *win_params = (char *) malloc(16 + strlen(params));
+
+	strcpy(win_params, params);
+
+	if (strlen(params)) {
+		strcat(win_params, " ");
+	}
+
+	strcat(win_params, "wid [..wid]");
+
+	xcbh_usage(name, win_params);
+}
+
+void
+xcbh_usage(char *name, char *params)
+{
 	xcbh_show_header();
-	fprintf(stderr, "Usage:\n\t%s %s<wid> [wid..]\n\n", basename(name), params);
+	fprintf(stderr, "Usage:\n\t%s %s\n\n", basename(name), params);
 	exit(1);
 }
 

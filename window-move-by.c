@@ -17,7 +17,7 @@ main(int argc, char **argv)
 	xcb_get_geometry_reply_t *geom;
 
 	if (argc < 4) {
-		xcbh_win_usage(argv[0], "<x> <y> ");
+		xcbh_win_usage(argv[0], "x y");
 	}
 
 	xcbh_conn_init(&conn);
