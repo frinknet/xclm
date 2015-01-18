@@ -32,6 +32,11 @@ char *xcbh_win_command(xcb_connection_t *, xcb_window_t);
 
 xcb_window_t xcbh_win_current();
 
+void xcbh_win_register_events(xcb_window_t, uint32_t);
+bool xcbh_event_notify_valid(xcb_generic_event_t*);
+void xcbh_event_loop(void);
+void xcbh_event_trigger(char *, xcb_window_t)
+
 void xcbh_win_usage(char *, char *);
 void xcbh_usage(char *, char *);
 void xcbh_show_header();

@@ -287,6 +287,172 @@ xcbh_win_current(xcb_connection_t *conn)
 }
 
 void
+xcbh_win_register_events(xcb_window_t win, uint32_t mask)
+{
+	uint32_t values[] = { mask };
+
+	xcb_change_window_attributes(conn, w, XCB_CW_EVENT_MASK, values);
+	xcb_flush(conn);
+}
+
+bool
+xcbh_event_notify_valid(xcb_generic_event_t *event)
+{
+	xcb_enter_notify_event_t *notify;
+	notify = (xcb_enter_notify_event_t*)event;
+
+	switch (notify->mode) {
+	case XCB_NOTIFY_MODE_NORMAL:
+	case XCB_NOTIFY_MODE_UNGRAB:
+		if (notify->detail == 0) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void
+xcbh_event_loop(void)
+{
+	bool running = true;
+	xcb_generic_event_t *event;
+
+	while (running) {
+		event = xcb_wait_for_event(conn);
+
+		switch (event->response_type & ~0x80) {
+		case XCB_ENTER_NOTIFY:
+			if (xcbh_event_notify_valid(event)) {
+				event_trigger("window-mouse-enter", ((xcb_enter_notify_event_t*)event)->event);
+			}
+
+			break;
+		case XCB_LEAVE_NOTIFY:
+			if (xcbh_event_notify_valid(event)) {
+				xcbh_event_trigger("window-mouse-leave", ((xcb_enter_notify_event_t*)event)->event);
+			}
+
+			break;
+		case XCB_GRAPHICS_EXPOSURE:
+			xcbh_event_trigger("window-graphics-expose", 0);
+
+			break;
+		case XCB_NO_EXPOSURE:
+			xcbh_event_trigger("window-no-expose", 0);
+
+			break;
+		case XCB_VISIBILITY_NOTIFY:
+			xcbh_event_trigger("window-visible", 0);
+
+			break;
+		case XCB_REPARENT_NOTIFY:
+			xcbh_event_trigger("window-reparent", 0);
+
+			break;
+		case XCB_CONFIGURE_REQUEST:
+			xcbh_event_trigger("configure-request", 0);
+
+			break;
+		case XCB_CONFIGURE_NOTIFY:
+			xcbh_event_trigger("configure-notify", 0);
+
+			break;
+		case XCB_RESIZE_REQUEST:
+			xcbh_event_trigger("window-resize", 0);
+
+			break;
+		case XCB_GRAVITY_NOTIFY:
+			xcbh_event_trigger("gravity-notify", 0);
+
+			break;
+		case XCB_CIRCULATE_REQUEST:
+			xcbh_event_trigger("circulate-request", 0);
+
+			break;
+		case XCB_CIRCULATE_NOTIFY:
+			xcbh_event_trigger("circulate-notify", 0);
+
+			break;
+		case XCB_PROPERTY_NOTIFY:
+			xcbh_event_trigger("property-notify", 0);
+
+			break;
+		case XCB_SELECTION_CLEAR:
+			xcbh_event_trigger("selection-clear", 0);
+
+			break;
+		case XCB_SELECTION_REQUEST:
+			xcbh_event_trigger("selection-request", 0);
+
+			break;
+		case XCB_SELECTION_NOTIFY:
+			xcbh_event_trigger("selection-notify", 0);
+
+			break;
+		case XCB_COLORMAP_NOTIFY:
+			xcbh_event_trigger("colormap-notify", 0);
+
+			break;
+		case XCB_FOCUS_IN:
+			xcbh_event_trigger("window-focus", ((xcb_focus_in_event_t*)event)->event);
+
+			break;
+		case XCB_FOCUS_OUT:
+			xcbh_event_trigger("window-blur", ((xcb_focus_in_event_t*)event)->event);
+
+			break;
+		case XCB_CLIENT_MESSAGE:
+			xcbh_event_trigger("client-message", 0);
+
+			break;
+		case XCB_MAP_REQUEST:
+			xcbh_event_trigger("window-map-request", ((xcb_map_notify_event_t*)event)->window);
+
+			break;
+		case XCB_MAP_NOTIFY:
+			xcbh_event_trigger("window-mapped", ((xcb_map_notify_event_t*)event)->window);
+
+			break;
+		case XCB_UNMAP_NOTIFY:
+			xcbh_event_trigger("window-unmapped", ((xcb_map_notify_event_t*)event)->window);
+
+			break;
+		case XCB_MAPPING_NOTIFY:
+			xcbh_event_trigger("window-mapping", (((xcb_map_notify_event_t*)event)->window);
+
+			break;
+		case XCB_DESTROY_NOTIFY:
+			xcbh_event_trigger("window-destroy", ((xcb_create_notify_event_t*)event)->window);
+
+			break;
+		case XCB_CREATE_NOTIFY:
+			xcbh_event_trigger("window-create", ((xcb_create_notify_event_t*)event)->window);
+
+			xcbh_win_register_events(win, mask);
+
+			break;
+		default:
+			sprintf(event_name, "xcb-event-%d", event->response_type);
+
+			xcbh_event_trigger(event_name, 0);
+		}
+	}
+}
+
+void
+xcbh_event_trigger(char *event_name, xcb_window_t win)
+{
+	if (win && !xcbh_win_ignored(conn, win)) {
+		printf("event-trigger %s 0x%08x\n", event_name, win);
+	} else {
+		printf("event-trigger %s\n", event_name);
+	}
+
+	fflush(stdout);
+}
+
+void
 xcbh_win_usage(char *name, char *params)
 {
 	char *win_params = (char *) malloc(16 + strlen(params));
