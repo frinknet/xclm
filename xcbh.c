@@ -288,10 +288,20 @@ xcbh_win_current(xcb_connection_t *conn)
 void
 xcbh_win_usage(char *name, char *params)
 {
+	xcbh_show_header();
 	fprintf(stderr, "usage: %s %s<wid> [wid..]\n", name, params);
 	exit(1);
 }
 
+}
+
+void
+xcbh_show_header()
+{
+	fprintf(stderr, "XCB Tools Version %s", XCBH_VERSION);
+	fprintf(stderr, " - Copyright %s\n", XCBH_COPYRIGHT);
+	fprintf(stderr, "LICENSE: %s\n\n", XCBH_LICENSE);
+}
 /*
 void
 xcbh_pointer_center(xcb_connection_t conn, xcb_window_t win)

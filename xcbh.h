@@ -1,6 +1,10 @@
 #ifndef XCB_HELPERS_H__
 #define XCB_HELPERS_H__
 
+#define XCBH_VERSION "1.2"
+#define XCBH_COPYRIGHT "2015, FRINKnet and the Expatriated Lemurs of Borneo"
+#define XCBH_LICENSE "MIT - see http://lemurs.mit-license.org"
+
 void xcbh_conn_init(xcb_connection_t **);
 void xcbh_conn_kill(xcb_connection_t **);
 
@@ -29,4 +33,5 @@ char *xcbh_win_command(xcb_connection_t *, xcb_window_t);
 xcb_window_t xcbh_win_current();
 
 void xcbh_win_usage(char *, char *);
+void xcbh_show_header();
 #endif
