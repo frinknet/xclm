@@ -30,7 +30,7 @@ void
 print_if_visible(xcb_window_t win)
 {
 	if (xcbh_win_mapped(conn, win) && !xcbh_win_ignored(conn, win)) {
-		printf("0x%08x", win);
+		printf("0x%08x ", win);
 	}
 }
 

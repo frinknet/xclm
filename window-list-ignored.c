@@ -22,13 +22,15 @@ print_children(xcb_window_t root)
 	while (*win++) {
 		print_if_ignored(*win);
 	}
+
+	printf("%s", "\n");
 }
 
 void
 print_if_ignored(xcb_window_t win)
 {
 	if (xcbh_win_ignored(conn, win)) {
-		printf("0x%08x\n", win);
+		printf("0x%08x", win);
 	}
 }
 

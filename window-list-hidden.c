@@ -22,13 +22,15 @@ print_children(xcb_window_t root)
 	while (*win++) {
 		print_if_hidden(*win);
 	}
+
+	printf("%s", "\n");
 }
 
 void
 print_if_hidden(xcb_window_t win)
 {
 	if (!xcbh_win_mapped(conn, win)) {
-		printf("0x%08x\n", win);
+		printf("0x%08x ", win);
 	}
 }
 
