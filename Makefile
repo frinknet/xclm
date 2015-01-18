@@ -34,13 +34,13 @@ SRC = \
 	list-ignored-windows.c \
 	list-managed-windows.c \
 	list-visible-windows.c \
-	is-window-ignored.c \
-	is-window-managed.c \
-	is-window-hidden.c \
-	is-window-class.c \
-	is-window-command.c \
-	is-window-visible.c \
-	is-window-valid.c
+	window-is-ignored.c \
+	window-is-managed.c \
+	window-is-hidden.c \
+	window-is-visible.c \
+	window-is-class.c \
+	window-is-command.c \
+	window-is-valid.c
 
 OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)
