@@ -2,9 +2,8 @@ include config.mk
 
 HDR = xcbh.h
 SRC = \
-	current-window.c \
 	current-root.c \
-	monitor-get-root.c \
+	current-window.c \
 	window-focus.c \
 	window-kill.c \
 	window-move.c \
@@ -32,8 +31,6 @@ SRC = \
 	window-list-managed.c \
 	window-list-visible.c \
 	window-list-hidden.c \
-	window-list-focused.c \
-	window-list-unfocused.c \
 	window-list-children.c \
 	window-list-parents.c \
 	window-is-ignored.c \
