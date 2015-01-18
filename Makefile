@@ -6,12 +6,12 @@ SRC = \
 	current-window.c \
 	window-focus.c \
 	window-kill.c \
-	window-move.c \
-	window-resize.c \
-	window-warp.c \
-	window-moveby.c \
-	window-resizeby.c \
-	window-warpby.c \
+	window-move-by.c \
+	window-move-to.c \
+	window-warp-by.c \
+	window-warp-to.c \
+	window-resize-by.c \
+	window-resize-to.c \
 	window-show.c \
 	window-hide.c \
 	window-toggle.c \
