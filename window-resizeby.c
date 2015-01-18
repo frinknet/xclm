@@ -29,7 +29,7 @@ main(int argc, char **argv)
 		win = strtoul(*argv, NULL, 16);
 		geom = xcbh_win_geometry(conn, win);
 
-		xcbh_win_redraw(conn, win, geom->x - (width / 2), geom->y - (height / 2), geom->width + width, geom->height + height);
+		xcbh_win_warp(conn, win, geom->x - (width / 2), geom->y - (height / 2), geom->width + width, geom->height + height);
 	}
 
 	xcbh_conn_kill(&conn);

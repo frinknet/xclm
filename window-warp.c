@@ -29,7 +29,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbh_win_redraw(conn, win, x, y, width, height);
+		xcbh_win_warp(conn, win, x, y, width, height);
 	}
 
 	xcbh_conn_kill(&conn);
