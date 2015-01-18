@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 
@@ -288,16 +289,16 @@ xcbh_win_current(xcb_connection_t *conn)
 void
 xcbh_win_usage(char *name, char *params)
 {
-	xcbh_show_header(name);
-	fprintf(stderr, "Usage:\n\t%s %s<wid> [wid..]\n\n", name, params);
+	xcbh_show_header();
+	fprintf(stderr, "Usage:\n\t%s %s<wid> [wid..]\n\n", basename(name), params);
 	exit(1);
 }
 
 void
-xcbh_show_header(char *name)
+xcbh_show_header()
 {
-	fprintf(stderr, "FRINKnet XCB Tools v%s", XCBH_VERSION);
-	fprintf(stderr, " - Copyright %s\n", XCBH_COPYRIGHT);
+	fprintf(stderr, "FRINKnet XCB Tools v%s\n", XCBH_VERSION);
+	fprintf(stderr, "Copyright %s\n", XCBH_COPYRIGHT);
 	fprintf(stderr, "%s\n\n", XCBH_LICENSE);
 }
 
