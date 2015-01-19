@@ -1,3 +1,17 @@
+#define _XOPEN_SOURCE
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <err.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include <libgen.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_icccm.h>
+
 #ifndef XCB_HELPERS_H__
 #define XCB_HELPERS_H__
 
@@ -32,10 +46,11 @@ char *xcbh_win_command(xcb_connection_t *, xcb_window_t);
 
 xcb_window_t xcbh_win_current();
 
-void xcbh_win_register_events(xcb_window_t, uint32_t);
+void xcbh_event_register(xcb_connection_t *, xcb_window_t, uint32_t);
 bool xcbh_event_notify_valid(xcb_generic_event_t*);
-void xcbh_event_loop(void);
-void xcbh_event_trigger(char *, xcb_window_t)
+void xcbh_event_loop(xcb_connection_t *, char *);
+bool xcbh_event_trigger(xcb_connection_t *, xcb_window_t, char *, char *);
+pid_t xcbh_event_spawn(xcb_window_t, char *, char *, char **);
 
 void xcbh_win_usage(char *, char *);
 void xcbh_usage(char *, char *);

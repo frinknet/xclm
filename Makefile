@@ -4,6 +4,8 @@ HDR = xcbh.h
 SRC = \
 	current-root.c \
 	current-window.c \
+	event-watch.c \
+	event-trigger.c \
 	window-focus.c \
 	window-kill.c \
 	window-move-by.c \
