@@ -12,12 +12,13 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 
-#ifndef XCB_HELPERS_H__
-#define XCB_HELPERS_H__
+#ifndef XCBTOOLS_H__
+#define XCBTOOLS_H__
 
-#define XCBH_VERSION "1.2"
-#define XCBH_COPYRIGHT "2014-2015 FRINKnet and the Expatriated Lemurs of Borneo"
-#define XCBH_LICENSE "MIT LICENSE: http://lemurs.mit-license.org"
+#define XCBTOOLS_SUITE "XCB Tools"
+#define XCBTOOLS_VERSION "1.2"
+#define XCBTOOLS_COPYRIGHT "2014-2015 FRINKnet and Friends"
+#define XCBTOOLS_LICENSE "MIT LICENSE: http://lemurs.mit-license.org"
 
 void xcbtools_conn_init(xcb_connection_t **);
 void xcbtools_conn_kill(xcb_connection_t **);
@@ -54,5 +55,5 @@ pid_t xcbtools_event_spawn(xcb_window_t, char *, char *, char **);
 
 void xcbtools_win_usage(char *, char *);
 void xcbtools_usage(char *, char *);
-void xcbtools_show_header();
+void xcbtools_usage_header(char *);
 #endif

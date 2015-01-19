@@ -558,17 +558,17 @@ xcbtools_win_usage(char *name, char *params)
 void
 xcbtools_usage(char *name, char *params)
 {
-	xcbtools_show_header();
+	xcbtools_usage_header(basename(name));
 	fprintf(stderr, "Usage:\n\t%s %s\n\n", basename(name), params);
 	exit(1);
 }
 
 void
-xcbtools_show_header()
+xcbtools_usage_header(char *name)
 {
-	fprintf(stderr, "FRINKnet XCB Tools v%s\n", XCBH_VERSION);
-	fprintf(stderr, "Copyright %s\n", XCBH_COPYRIGHT);
-	fprintf(stderr, "%s\n\n", XCBH_LICENSE);
+	fprintf(stderr, "%s %s - Version %s\n", XCBTOOLS_SUITE, name, XCBTOOLS_VERSION);
+	fprintf(stderr, "Copyright %s\n", XCBTOOLS_COPYRIGHT);
+	fprintf(stderr, "%s\n\n", XCBTOOLS_LICENSE);
 }
 
 /*
