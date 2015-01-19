@@ -6,6 +6,7 @@ SRC = \
 	current-window.c \
 	event-watch.c \
 	event-trigger.c \
+	event-test.c \
 	window-focus.c \
 	window-kill.c \
 	window-move-by.c \
