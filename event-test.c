@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+/* See LICENSE file for copyright and license details. */
+
+#include "xcbtools.h"
 
 int
 main(int argc, char **argv)

@@ -1,11 +1,5 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <xcb/xcb.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <err.h>
-
 #include "xcbtools.h"
 
 static xcb_connection_t *conn;

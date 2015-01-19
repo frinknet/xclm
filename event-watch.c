@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <err.h>
-#include <getopt.h>
-#include <xcb/xcb.h>
+/* See LICENSE file for copyright and license details. */
 
 #include "xcbtools.h"
 
