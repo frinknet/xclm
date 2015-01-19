@@ -5,7 +5,7 @@
 int
 main(int argc, char **argv)
 {
-	printf("EVENT=%s\n", argv[1]);
+	printf("Triggering %s...\n", argv[0]);
 	printf("PATH=%s\n", getenv("PATH"));
 	printf("EVENTS=%s\n", getenv("EVENTS"));
 	printf("COMMANDS=%s\n", getenv("COMMANDS"));
