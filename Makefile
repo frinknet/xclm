@@ -51,7 +51,7 @@ MAN = $(SRC:.c=.1.gz)
 .POSIX:
 .SUFFIXES: .1 .1.gz
 
-all: binutils manpages
+all: binutils
 
 binutils: $(BIN)
 
@@ -82,6 +82,8 @@ uninstall:
 	done
 	cd man; $(MAKE) $(MFLAGS) uninstall
 
-clean :
+clean:
 	rm -f $(OBJ) $(BIN) xcbtools.o
+
+manclean:
 	cd man; $(MAKE) $(MFLAGS) clean
