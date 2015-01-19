@@ -63,6 +63,8 @@ $(OBJ): $(HDR) xcbtools.o
 .o:
 	@echo "LD $@"
 	@$(LD) $< xcbtools.o -o $@ $(LDFLAGS)
+	@echo "ST $@"
+	@$(ST) $(STFLAGS) $@
 
 .c.o:
 	@echo "CC $<"
