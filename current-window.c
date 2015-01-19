@@ -5,18 +5,18 @@
 #include <stdlib.h>
 #include <xcb/xcb.h>
 
-#include "xcbh.h"
+#include "xcbtools.h"
 
 static xcb_connection_t *conn;
 
 int
 main(int argc, char **argv)
 {
-	xcbh_conn_init(&conn);
+	xcbtools_conn_init(&conn);
 
-	printf("0x%08x\n", xcbh_win_current(conn));
+	printf("0x%08x\n", xcbtools_win_current(conn));
 
-	xcbh_conn_kill(&conn);
+	xcbtools_conn_kill(&conn);
 
 	return 0;
 }

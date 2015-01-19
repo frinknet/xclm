@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <err.h>
 
-#include "xcbh.h"
+#include "xcbtools.h"
 
 static xcb_connection_t *conn;
 
@@ -16,10 +16,10 @@ main(int argc, char **argv)
 	xcb_window_t win;
 
 	if (argc < 4) {
-		xcbh_win_usage(argv[0], "x y");
+		xcbtools_win_usage(argv[0], "x y");
 	}
 
-	xcbh_conn_init(&conn);
+	xcbtools_conn_init(&conn);
 
 	x = atoi(*(++argv));
 	y = atoi(*(++argv));
@@ -27,10 +27,10 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbh_win_move(conn, win, x, y);
+		xcbtools_win_move(conn, win, x, y);
 	}
 
-	xcbh_conn_kill(&conn);
+	xcbtools_conn_kill(&conn);
 
 	return 0;
 }

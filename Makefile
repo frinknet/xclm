@@ -1,6 +1,6 @@
 include config.mk
 
-HDR = xcbh.h
+HDR = xcbtools.h
 SRC = \
 	current-root.c \
 	current-window.c \
@@ -58,11 +58,11 @@ binutils: $(BIN)
 manpages:
 	cd man; $(MAKE) $(MFLAGS)
 
-$(OBJ): $(HDR) xcbh.o
+$(OBJ): $(HDR) xcbtools.o
 
 .o:
 	@echo "LD $@"
-	@$(LD) $< xcbh.o -o $@ $(LDFLAGS)
+	@$(LD) $< xcbtools.o -o $@ $(LDFLAGS)
 
 .c.o:
 	@echo "CC $<"
@@ -81,5 +81,5 @@ uninstall:
 	cd man; $(MAKE) $(MFLAGS) uninstall
 
 clean :
-	rm -f $(OBJ) $(BIN) xcbh.o
+	rm -f $(OBJ) $(BIN) xcbtools.o
 	cd man; $(MAKE) $(MFLAGS) clean

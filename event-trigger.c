@@ -6,7 +6,7 @@
 #include <string.h>
 #include <xcb/xcb.h>
 
-#include "xcbh.h"
+#include "xcbtools.h"
 
 static xcb_connection_t *conn;
 
@@ -18,13 +18,13 @@ main(int argc, char **argv)
 	char *event_name;
 
 	if (argc < 2) {
-		xcbh_usage(argv[0], "event-name [..wid]");
+		xcbtools_usage(argv[0], "event-name [..wid]");
 	}
 
 	event_name = *++argv;
 
 	if (argc < 3) {
-		xcbh_event_trigger(conn, 0, event_name, event_dir);
+		xcbtools_event_trigger(conn, 0, event_name, event_dir);
 
 		return 0;
 	}
@@ -32,10 +32,10 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbh_event_trigger(conn, win, event_name, event_dir);
+		xcbtools_event_trigger(conn, win, event_name, event_dir);
 	}
 
-	xcbh_conn_kill(&conn);
+	xcbtools_conn_kill(&conn);
 
 	return 0;
 }

@@ -5,7 +5,7 @@
 #include <xcb/xcb.h>
 #include <err.h>
 
-#include "xcbh.h"
+#include "xcbtools.h"
 
 static xcb_connection_t *conn;
 static xcb_screen_t *screen;
@@ -16,7 +16,7 @@ void
 print_parents(xcb_window_t win)
 {
 	while (win != screen->root) {
-		win = xcbh_win_parent(conn, win);
+		win = xcbtools_win_parent(conn, win);
 
 		printf("0x%08x ", win);
 	}
@@ -30,11 +30,11 @@ main(int argc, char **argv)
 	xcb_window_t win = 0;
 
 	if (argc < 2) {
-		xcbh_win_usage(argv[0], "");
+		xcbtools_win_usage(argv[0], "");
 	}
 
-	xcbh_conn_init(&conn);
-	xcbh_screen_init(conn, &screen);
+	xcbtools_conn_init(&conn);
+	xcbtools_screen_init(conn, &screen);
 
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
@@ -42,7 +42,7 @@ main(int argc, char **argv)
 		print_parents(win);
 	}
 
-	xcbh_conn_kill(&conn);
+	xcbtools_conn_kill(&conn);
 
 	return 0;
 }

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <err.h>
 
-#include "xcbh.h"
+#include "xcbtools.h"
 
 static xcb_connection_t *conn;
 
@@ -17,22 +17,22 @@ main(int argc, char **argv)
 	xcb_get_geometry_reply_t *geom;
 
 	if (argc < 4) {
-		xcbh_win_usage(argv[0], "width height");
+		xcbtools_win_usage(argv[0], "width height");
 	}
 
-	xcbh_conn_init(&conn);
+	xcbtools_conn_init(&conn);
 
 	width = atoi(*(++argv));
 	height = atoi(*(++argv));
 
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
-		geom = xcbh_win_geometry(conn, win);
+		geom = xcbtools_win_geometry(conn, win);
 
-		xcbh_win_warp(conn, win, geom->x - (width / 2), geom->y - (height / 2), geom->width + width, geom->height + height);
+		xcbtools_win_warp(conn, win, geom->x - (width / 2), geom->y - (height / 2), geom->width + width, geom->height + height);
 	}
 
-	xcbh_conn_kill(&conn);
+	xcbtools_conn_kill(&conn);
 
 	return 0;
 }

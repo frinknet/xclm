@@ -6,7 +6,7 @@
 #include <string.h>
 #include <err.h>
 
-#include "xcbh.h"
+#include "xcbtools.h"
 
 static xcb_connection_t *conn;
 
@@ -17,10 +17,10 @@ main(int argc, char **argv)
 	char *class = "";
 
 	if (argc < 3) {
-		xcbh_win_usage(argv[0], "class");
+		xcbtools_win_usage(argv[0], "class");
 	}
 
-	xcbh_conn_init(&conn);
+	xcbtools_conn_init(&conn);
 
 	;
 
@@ -31,14 +31,14 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		if (strcmp(class, xcbh_win_class(conn, win))) {
-			xcbh_conn_kill(&conn);
+		if (strcmp(class, xcbtools_win_class(conn, win))) {
+			xcbtools_conn_kill(&conn);
 
 			return 1;
 		}
 	}
 
-	xcbh_conn_kill(&conn);
+	xcbtools_conn_kill(&conn);
 
 	return 0;
 }
