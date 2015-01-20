@@ -17,7 +17,7 @@
 
 #define XCBTOOLS_SUITE "XCB Tools"
 #define XCBTOOLS_VERSION "1.2"
-#define XCBTOOLS_COPYRIGHT "2014-2015 FRINKnet and Friends"
+#define XCBTOOLS_COPYRIGHT "2014-2015 FRINKnet and Lemurs"
 #define XCBTOOLS_LICENSE "MIT LICENSE: http://lemurs.mit-license.org"
 
 void xcbtools_conn_init(xcb_connection_t **);
@@ -51,7 +51,8 @@ void xcbtools_event_register(xcb_connection_t *, xcb_window_t, uint32_t);
 bool xcbtools_event_notify_valid(xcb_generic_event_t*);
 void xcbtools_event_loop(xcb_connection_t *, char *);
 bool xcbtools_event_trigger(xcb_connection_t *, xcb_window_t, char *, char *);
-pid_t xcbtools_event_spawn(xcb_window_t, char *, char *, char **);
+char **xcbtools_event_environment(xcb_window_t);
+pid_t xcbtools_event_spawn(xcb_window_t, char *);
 
 void xcbtools_win_usage(char *, char *);
 void xcbtools_usage(char *, char *);

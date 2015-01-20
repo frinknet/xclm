@@ -26,7 +26,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbtools_event_trigger(conn, win, event_name, event_dir);
+		xcbtools_event_trigger(conn, win, event_name, event_dir? event_dir : "~/.events");
 	}
 
 	xcbtools_conn_kill(&conn);
