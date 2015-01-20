@@ -58,60 +58,6 @@ xcbtools_window_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 	return value;
 }
 
-int
-xcbtools_window_exists(xcb_connection_t *conn, xcb_window_t win)
-{
-	xcb_get_window_attributes_reply_t  *attr;
-
-	attr = xcbtools_window_attributes(conn, win);
-
-	if (attr == NULL) {
-		return 0;
-	}
-
-	free(attr);
-
-	return 1;
-}
-
-int
-xcbtools_window_mapped(xcb_connection_t *conn, xcb_window_t win)
-{
-	int mapped;
-	xcb_get_window_attributes_reply_t  *attr;
-
-	attr = xcbtools_window_attributes(conn, win);
-
-	if (attr == NULL) {
-		return 0;
-	}
-
-	mapped = attr->map_state;
-
-	free(attr);
-
-	return mapped == XCB_MAP_STATE_VIEWABLE;
-}
-
-int
-xcbtools_window_ignored(xcb_connection_t *conn, xcb_window_t win)
-{
-	int override;
-	xcb_get_window_attributes_reply_t *attr;
-
-	attr = xcbtools_window_attributes(conn, win);
-
-	if (attr == NULL) {
-		return 0;
-	}
-
-	override = attr->override_redirect;
-
-	free(attr);
-
-	return override;
-}
-
 void
 xcbtools_window_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
@@ -119,6 +65,20 @@ xcbtools_window_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 	uint32_t value[] = { override };
 
 	xcb_change_window_attributes(conn, win, mask, value);
+}
+
+void
+xcbtools_window_border(xcb_connection_t *conn, xcb_window_t win, int size, int color)
+{
+	int mask = XCB_CONFIG_WINDOW_BORDER_WIDTH | XCB_CW_BORDER_PIXEL;
+	uint32_t values[] = {
+		size,
+		color
+	};
+
+	xcb_configure_window(conn, win, mask, values);
+
+	xcb_flush(conn);
 }
 
 void
@@ -187,6 +147,60 @@ xcbtools_window_geometry(xcb_connection_t *conn, xcb_window_t win)
 	}
 
 	return reply;
+}
+
+int
+xcbtools_window_exists(xcb_connection_t *conn, xcb_window_t win)
+{
+	xcb_get_window_attributes_reply_t  *attr;
+
+	attr = xcbtools_window_attributes(conn, win);
+
+	if (attr == NULL) {
+		return 0;
+	}
+
+	free(attr);
+
+	return 1;
+}
+
+int
+xcbtools_window_mapped(xcb_connection_t *conn, xcb_window_t win)
+{
+	int mapped;
+	xcb_get_window_attributes_reply_t  *attr;
+
+	attr = xcbtools_window_attributes(conn, win);
+
+	if (attr == NULL) {
+		return 0;
+	}
+
+	mapped = attr->map_state;
+
+	free(attr);
+
+	return mapped == XCB_MAP_STATE_VIEWABLE;
+}
+
+int
+xcbtools_window_ignored(xcb_connection_t *conn, xcb_window_t win)
+{
+	int override;
+	xcb_get_window_attributes_reply_t *attr;
+
+	attr = xcbtools_window_attributes(conn, win);
+
+	if (attr == NULL) {
+		return 0;
+	}
+
+	override = attr->override_redirect;
+
+	free(attr);
+
+	return override;
 }
 
 int

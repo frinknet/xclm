@@ -26,6 +26,7 @@ void xcbtools_conn_kill(xcb_connection_t **);
 
 void xcbtools_screen_init(xcb_connection_t *, xcb_screen_t **);
 
+void xcbtools_window_border(xcb_connection_t *, xcb_window_t, int, int);
 void xcbtools_window_stack(xcb_connection_t *, xcb_window_t, uint32_t);
 void xcbtools_window_ignore(xcb_connection_t *, xcb_window_t, int);
 void xcbtools_window_move(xcb_connection_t *, xcb_window_t, int, int);
@@ -45,6 +46,7 @@ char *xcbtools_window_property(xcb_connection_t *, xcb_window_t, xcb_atom_t);
 char *xcbtools_window_name(xcb_connection_t *, xcb_window_t);
 char *xcbtools_window_class(xcb_connection_t *, xcb_window_t);
 char *xcbtools_window_command(xcb_connection_t *, xcb_window_t);
+
 
 xcb_window_t xcbtools_window_current();
 
