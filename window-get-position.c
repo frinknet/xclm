@@ -11,14 +11,14 @@ main(int argc, char **argv)
 	xcb_get_geometry_reply_t *geom;
 
 	if (argc < 2) {
-		xcbtools_win_usage(argv[0], "");
+		xcbtools_usage_window(argv[0], "");
 	}
 
 	xcbtools_conn_init(&conn);
 
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
-		geom = xcbtools_win_geometry(conn, win);
+		geom = xcbtools_window_geometry(conn, win);
 
 		printf("%d %d\n", geom->x, geom->y);
 	}

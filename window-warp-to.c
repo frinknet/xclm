@@ -11,7 +11,7 @@ main(int argc, char **argv)
 	xcb_window_t win;
 
 	if (argc < 6) {
-		xcbtools_win_usage(argv[0], "x y width height ");
+		xcbtools_usage_window(argv[0], "x y width height ");
 	}
 
 	xcbtools_conn_init(&conn);
@@ -24,7 +24,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbtools_win_warp(conn, win, x, y, width, height);
+		xcbtools_window_warp(conn, win, x, y, width, height);
 	}
 
 	xcbtools_conn_kill(&conn);

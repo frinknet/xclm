@@ -9,7 +9,7 @@ main(int argc, char **argv)
 {
 	xcbtools_conn_init(&conn);
 
-	printf("0x%08x\n", xcbtools_win_current(conn));
+	printf("0x%08x\n", xcbtools_window_current(conn));
 
 	xcbtools_conn_kill(&conn);
 

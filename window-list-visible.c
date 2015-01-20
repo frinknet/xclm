@@ -12,7 +12,7 @@ print_children(xcb_window_t root)
 {
 	xcb_window_t *win;
 
-	xcbtools_win_children(conn, root, &win);
+	xcbtools_window_children(conn, root, &win);
 
 	while (*win++) {
 		print_if_visible(*win);
@@ -24,7 +24,7 @@ print_children(xcb_window_t root)
 void
 print_if_visible(xcb_window_t win)
 {
-	if (xcbtools_win_mapped(conn, win) && !xcbtools_win_ignored(conn, win)) {
+	if (xcbtools_window_mapped(conn, win) && !xcbtools_window_ignored(conn, win)) {
 		printf("0x%08x ", win);
 	}
 }
@@ -35,7 +35,7 @@ main(int argc, char **argv)
 	xcb_window_t win;
 
 	if (argc < 2) {
-		xcbtools_win_usage(argv[0], "");
+		xcbtools_usage_window(argv[0], "");
 	}
 
 	xcbtools_conn_init(&conn);

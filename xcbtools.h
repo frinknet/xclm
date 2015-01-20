@@ -9,6 +9,7 @@
 #include <libgen.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 
@@ -25,36 +26,36 @@ void xcbtools_conn_kill(xcb_connection_t **);
 
 void xcbtools_screen_init(xcb_connection_t *, xcb_screen_t **);
 
-void xcbtools_win_stack(xcb_connection_t *, xcb_window_t, uint32_t);
-void xcbtools_win_ignore(xcb_connection_t *, xcb_window_t, int);
-void xcbtools_win_move(xcb_connection_t *, xcb_window_t, int, int);
-void xcbtools_win_resize(xcb_connection_t *, xcb_window_t, int, int);
-void xcbtools_win_warp(xcb_connection_t *, xcb_window_t, int, int, int, int);
+void xcbtools_window_stack(xcb_connection_t *, xcb_window_t, uint32_t);
+void xcbtools_window_ignore(xcb_connection_t *, xcb_window_t, int);
+void xcbtools_window_move(xcb_connection_t *, xcb_window_t, int, int);
+void xcbtools_window_resize(xcb_connection_t *, xcb_window_t, int, int);
+void xcbtools_window_warp(xcb_connection_t *, xcb_window_t, int, int, int, int);
 
-int xcbtools_win_exists(xcb_connection_t *, xcb_window_t);
-int xcbtools_win_mapped(xcb_connection_t *, xcb_window_t);
-int xcbtools_win_ignored(xcb_connection_t *, xcb_window_t);
-int xcbtools_win_children(xcb_connection_t *, xcb_window_t, xcb_window_t **);
+int xcbtools_window_exists(xcb_connection_t *, xcb_window_t);
+int xcbtools_window_mapped(xcb_connection_t *, xcb_window_t);
+int xcbtools_window_ignored(xcb_connection_t *, xcb_window_t);
+int xcbtools_window_children(xcb_connection_t *, xcb_window_t, xcb_window_t **);
 
-xcb_window_t xcbtools_win_parent(xcb_connection_t *, xcb_window_t);
-xcb_get_geometry_reply_t *xcbtools_win_geometry(xcb_connection_t *, xcb_window_t);
-xcb_get_window_attributes_reply_t *xcbtools_win_attributes(xcb_connection_t *, xcb_window_t);
+xcb_window_t xcbtools_window_parent(xcb_connection_t *, xcb_window_t);
+xcb_get_geometry_reply_t *xcbtools_window_geometry(xcb_connection_t *, xcb_window_t);
+xcb_get_window_attributes_reply_t *xcbtools_window_attributes(xcb_connection_t *, xcb_window_t);
 
-char *xcbtools_win_property(xcb_connection_t *, xcb_window_t, xcb_atom_t);
-char *xcbtools_win_name(xcb_connection_t *, xcb_window_t);
-char *xcbtools_win_class(xcb_connection_t *, xcb_window_t);
-char *xcbtools_win_command(xcb_connection_t *, xcb_window_t);
+char *xcbtools_window_property(xcb_connection_t *, xcb_window_t, xcb_atom_t);
+char *xcbtools_window_name(xcb_connection_t *, xcb_window_t);
+char *xcbtools_window_class(xcb_connection_t *, xcb_window_t);
+char *xcbtools_window_command(xcb_connection_t *, xcb_window_t);
 
-xcb_window_t xcbtools_win_current();
+xcb_window_t xcbtools_window_current();
 
 void xcbtools_event_register(xcb_connection_t *, xcb_window_t, uint32_t);
 bool xcbtools_event_notify_valid(xcb_generic_event_t*);
 void xcbtools_event_loop(xcb_connection_t *, char *);
-bool xcbtools_event_trigger(xcb_connection_t *, xcb_window_t, char *, char *);
+bool xcbtools_event_trigger(xcb_connection_t *, xcb_window_t, char *, char *, bool);
 char **xcbtools_event_environment(xcb_window_t);
-pid_t xcbtools_event_spawn(xcb_window_t, char *);
+pid_t xcbtools_event_spawn(xcb_window_t, char *, bool);
 
-void xcbtools_win_usage(char *, char *);
+void xcbtools_usage_window(char *, char *);
 void xcbtools_usage(char *, char *);
 void xcbtools_usage_header(char *);
 #endif

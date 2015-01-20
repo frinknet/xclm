@@ -12,7 +12,7 @@ main(int argc, char **argv)
 	xcb_get_geometry_reply_t *geom;
 
 	if (argc < 6) {
-		xcbtools_win_usage(argv[0], "x y width height");
+		xcbtools_usage_window(argv[0], "x y width height");
 	}
 
 	xcbtools_conn_init(&conn);
@@ -24,9 +24,9 @@ main(int argc, char **argv)
 
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
-		geom = xcbtools_win_geometry(conn, win);
+		geom = xcbtools_window_geometry(conn, win);
 
-		xcbtools_win_warp(conn, win, geom->x + x, geom->y + y, geom->width + width, geom->height + height);
+		xcbtools_window_warp(conn, win, geom->x + x, geom->y + y, geom->width + width, geom->height + height);
 	}
 
 	xcbtools_conn_kill(&conn);

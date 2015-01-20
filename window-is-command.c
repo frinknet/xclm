@@ -11,7 +11,7 @@ main(int argc, char **argv)
 	char *command = "";
 
 	if (argc < 3) {
-		xcbtools_win_usage(argv[0], "command");
+		xcbtools_usage_window(argv[0], "command");
 	}
 
 	xcbtools_conn_init(&conn);
@@ -25,7 +25,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		if (strcmp(command, xcbtools_win_command(conn, win))) {
+		if (strcmp(command, xcbtools_window_command(conn, win))) {
 			xcbtools_conn_kill(&conn);
 
 			return 1;

@@ -29,9 +29,8 @@ xcbtools_screen_init(xcb_connection_t *conn, xcb_screen_t **screen)
 	}
 }
 
-
 xcb_get_window_attributes_reply_t *
-xcbtools_win_attributes(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_attributes(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_window_attributes_cookie_t cookie;
 	xcb_get_window_attributes_reply_t  *reply;
@@ -43,7 +42,7 @@ xcbtools_win_attributes(xcb_connection_t *conn, xcb_window_t win)
 }
 
 char *
-xcbtools_win_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
+xcbtools_window_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
 {
 	xcb_get_property_cookie_t cookie;
 	xcb_get_property_reply_t *reply;
@@ -59,13 +58,12 @@ xcbtools_win_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
 	return value;
 }
 
-
 int
-xcbtools_win_exists(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_exists(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_window_attributes_reply_t  *attr;
 
-	attr = xcbtools_win_attributes(conn, win);
+	attr = xcbtools_window_attributes(conn, win);
 
 	if (attr == NULL) {
 		return 0;
@@ -77,12 +75,12 @@ xcbtools_win_exists(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xcbtools_win_mapped(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_mapped(xcb_connection_t *conn, xcb_window_t win)
 {
 	int mapped;
 	xcb_get_window_attributes_reply_t  *attr;
 
-	attr = xcbtools_win_attributes(conn, win);
+	attr = xcbtools_window_attributes(conn, win);
 
 	if (attr == NULL) {
 		return 0;
@@ -96,12 +94,12 @@ xcbtools_win_mapped(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xcbtools_win_ignored(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_ignored(xcb_connection_t *conn, xcb_window_t win)
 {
 	int override;
-	xcb_get_window_attributes_reply_t  *attr;
+	xcb_get_window_attributes_reply_t *attr;
 
-	attr = xcbtools_win_attributes(conn, win);
+	attr = xcbtools_window_attributes(conn, win);
 
 	if (attr == NULL) {
 		return 0;
@@ -115,7 +113,7 @@ xcbtools_win_ignored(xcb_connection_t *conn, xcb_window_t win)
 }
 
 void
-xcbtools_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
+xcbtools_window_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
 	uint32_t mask = XCB_CW_OVERRIDE_REDIRECT;
 	uint32_t value[] = { override };
@@ -124,7 +122,7 @@ xcbtools_win_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 }
 
 void
-xcbtools_win_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
+xcbtools_window_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
 {
 	uint32_t mask = XCB_CONFIG_WINDOW_STACK_MODE;
 	uint32_t value[] = { stack };
@@ -133,7 +131,7 @@ xcbtools_win_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
 }
 
 void
-xcbtools_win_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
+xcbtools_window_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
 {
 	uint32_t values[2];
 	uint32_t mask = XCB_CONFIG_WINDOW_WIDTH
@@ -146,7 +144,7 @@ xcbtools_win_resize(xcb_connection_t *conn, xcb_window_t win, int width, int hei
 }
 
 void
-xcbtools_win_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
+xcbtools_window_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
 	uint32_t values[2];
 	uint32_t mask = XCB_CONFIG_WINDOW_X
@@ -159,7 +157,7 @@ xcbtools_win_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 }
 
 void
-xcbtools_win_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
+xcbtools_window_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
 {
 	uint32_t values[4];
 	uint32_t mask = XCB_CONFIG_WINDOW_X
@@ -176,7 +174,7 @@ xcbtools_win_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int wi
 }
 
 xcb_get_geometry_reply_t *
-xcbtools_win_geometry(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_geometry(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_geometry_cookie_t cookie;
 	xcb_get_geometry_reply_t *reply;
@@ -192,7 +190,7 @@ xcbtools_win_geometry(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xcbtools_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
+xcbtools_window_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 {
 	uint32_t childnum = 0;
 	xcb_query_tree_cookie_t cookie;
@@ -218,7 +216,7 @@ xcbtools_win_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **l
 }
 
 xcb_window_t
-xcbtools_win_parent(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_parent(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_window_t parent;
 	xcb_query_tree_cookie_t cookie;
@@ -239,25 +237,25 @@ xcbtools_win_parent(xcb_connection_t *conn, xcb_window_t win)
 }
 
 char *
-xcbtools_win_name(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_name(xcb_connection_t *conn, xcb_window_t win)
 {
-	return xcbtools_win_property(conn, win, XCB_ATOM_WM_NAME);
+	return xcbtools_window_property(conn, win, XCB_ATOM_WM_NAME);
 }
 
 char *
-xcbtools_win_class(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_class(xcb_connection_t *conn, xcb_window_t win)
 {
-	return xcbtools_win_property(conn, win, XCB_ATOM_WM_CLASS);
+	return xcbtools_window_property(conn, win, XCB_ATOM_WM_CLASS);
 }
 
 char *
-xcbtools_win_command(xcb_connection_t *conn, xcb_window_t win)
+xcbtools_window_command(xcb_connection_t *conn, xcb_window_t win)
 {
-	return xcbtools_win_property(conn, win, XCB_ATOM_WM_COMMAND);
+	return xcbtools_window_property(conn, win, XCB_ATOM_WM_COMMAND);
 }
 
 xcb_window_t
-xcbtools_win_current(xcb_connection_t *conn)
+xcbtools_window_current(xcb_connection_t *conn)
 {
 	xcb_window_t win = 0;
 
@@ -311,6 +309,7 @@ void
 xcbtools_event_loop(xcb_connection_t *conn, char *event_dir)
 {
 	bool running = true;
+	bool spawn = true;
 	xcb_generic_event_t *event;
 	char *event_name = "";
 
@@ -321,110 +320,110 @@ xcbtools_event_loop(xcb_connection_t *conn, char *event_dir)
 		switch (event->response_type & ~0x80) {
 		case XCB_ENTER_NOTIFY:
 			if (xcbtools_event_notify_valid(event)) {
-				xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "window-mouse-enter", event_dir);
+				xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "window-mouse-enter", event_dir, spawn);
 			}
 
 			break;
 		case XCB_LEAVE_NOTIFY:
 			if (xcbtools_event_notify_valid(event)) {
-				xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "window-mouse-leave", event_dir);
+				xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "window-mouse-leave", event_dir, spawn);
 			}
 
 			break;
 		case XCB_GRAPHICS_EXPOSURE:
-			xcbtools_event_trigger(conn, 0, "window-graphics-expose", event_dir);
+			xcbtools_event_trigger(conn, 0, "window-graphics-expose", event_dir, spawn);
 
 			break;
 		case XCB_NO_EXPOSURE:
-			xcbtools_event_trigger(conn, 0, "window-no-expose", event_dir);
+			xcbtools_event_trigger(conn, 0, "window-no-expose", event_dir, spawn);
 
 			break;
 		case XCB_VISIBILITY_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "window-visible", event_dir);
+			xcbtools_event_trigger(conn, 0, "window-visible", event_dir, spawn);
 
 			break;
 		case XCB_REPARENT_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "window-reparent", event_dir);
+			xcbtools_event_trigger(conn, 0, "window-reparent", event_dir, spawn);
 
 			break;
 		case XCB_CONFIGURE_REQUEST:
-			xcbtools_event_trigger(conn, 0, "configure-request", event_dir);
+			xcbtools_event_trigger(conn, 0, "configure-request", event_dir, spawn);
 
 			break;
 		case XCB_CONFIGURE_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "configure-notify", event_dir);
+			xcbtools_event_trigger(conn, 0, "configure-notify", event_dir, spawn);
 
 			break;
 		case XCB_RESIZE_REQUEST:
-			xcbtools_event_trigger(conn, 0, "window-resize", event_dir);
+			xcbtools_event_trigger(conn, 0, "window-resize", event_dir, spawn);
 
 			break;
 		case XCB_GRAVITY_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "gravity-notify", event_dir);
+			xcbtools_event_trigger(conn, 0, "gravity-notify", event_dir, spawn);
 
 			break;
 		case XCB_CIRCULATE_REQUEST:
-			xcbtools_event_trigger(conn, 0, "circulate-request", event_dir);
+			xcbtools_event_trigger(conn, 0, "circulate-request", event_dir, spawn);
 
 			break;
 		case XCB_CIRCULATE_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "circulate-notify", event_dir);
+			xcbtools_event_trigger(conn, 0, "circulate-notify", event_dir, spawn);
 
 			break;
 		case XCB_PROPERTY_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "property-notify", event_dir);
+			xcbtools_event_trigger(conn, 0, "property-notify", event_dir, spawn);
 
 			break;
 		case XCB_SELECTION_CLEAR:
-			xcbtools_event_trigger(conn, 0, "selection-clear", event_dir);
+			xcbtools_event_trigger(conn, 0, "selection-clear", event_dir, spawn);
 
 			break;
 		case XCB_SELECTION_REQUEST:
-			xcbtools_event_trigger(conn, 0, "selection-request", event_dir);
+			xcbtools_event_trigger(conn, 0, "selection-request", event_dir, spawn);
 
 			break;
 		case XCB_SELECTION_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "selection-notify", event_dir);
+			xcbtools_event_trigger(conn, 0, "selection-notify", event_dir, spawn);
 
 			break;
 		case XCB_COLORMAP_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "colormap-notify", event_dir);
+			xcbtools_event_trigger(conn, 0, "colormap-notify", event_dir, spawn);
 
 			break;
 		case XCB_FOCUS_IN:
-			xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-focus", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-focus", event_dir, spawn);
 
 			break;
 		case XCB_FOCUS_OUT:
-			xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-blur", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-blur", event_dir, spawn);
 
 			break;
 		case XCB_CLIENT_MESSAGE:
-			xcbtools_event_trigger(conn, 0, "client-message", event_dir);
+			xcbtools_event_trigger(conn, 0, "client-message", event_dir, spawn);
 
 			break;
 		case XCB_MAP_REQUEST:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-map-request", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-map-request", event_dir, spawn);
 
 			break;
 		case XCB_MAP_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-mapped", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-mapped", event_dir, spawn);
 
 			break;
 		case XCB_UNMAP_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-unmapped", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-unmapped", event_dir, spawn);
 
 			break;
 		case XCB_MAPPING_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-mapping", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-mapping", event_dir, spawn);
 
 			break;
 		case XCB_DESTROY_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-destroy", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-destroy", event_dir, spawn);
 
 			break;
 		case XCB_CREATE_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-create", event_dir);
+			xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-create", event_dir, spawn);
 
 			xcbtools_event_register(conn, ((xcb_create_notify_event_t*)event)->window, 0);
 
@@ -432,13 +431,13 @@ xcbtools_event_loop(xcb_connection_t *conn, char *event_dir)
 		default:
 			sprintf(event_name, "unknow-event-%d", event->response_type);
 
-			xcbtools_event_trigger(conn, 0, event_name, event_dir);
+			xcbtools_event_trigger(conn, 0, event_name, event_dir, spawn);
 		}
 	}
 }
 
 bool
-xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, char *event_dir)
+xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, char *event_dir, bool spawn)
 {
 	char *event_path = (char *) malloc(1 + strlen(event_name) + strlen(event_dir? event_dir : "~/.events"));
 	char *event_cmd;
@@ -448,7 +447,7 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 
 	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", event_name);
 
-	if (win && !xcbtools_win_ignored(conn, win)) {
+	if (win && !xcbtools_window_ignored(conn, win)) {
 		printf("event-trigger %s 0x%08x\n", event_name, win);
 	} else {
 		printf("event-trigger %s\n", event_name);
@@ -476,7 +475,7 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 
 		sprintf(event_cmd, "%s/%s", event_path, entry->d_name);
 
-		xcbtools_event_spawn(win, event_cmd);
+		xcbtools_event_spawn(win, event_cmd, spawn);
 	}
 
 	closedir(dir);
@@ -538,34 +537,17 @@ xcbtools_event_environment(xcb_window_t win)
 }
 
 pid_t
-xcbtools_event_spawn(xcb_window_t win, char *event_path)
+xcbtools_event_spawn(xcb_window_t win, char *event_path, bool spawn)
 {
-	pid_t pid;
+	pid_t pid = spawn? fork() : 0;
 	struct stat statbuf;
-	char *cmd[2] = {
+	char *cmd[] = {
 		event_path,
 		NULL
 	};
 
-	if (stat(event_path, &statbuf) != 0) {
-		printf("can't stat: %s\n", cmd[0]);
 
-		return 0;
-	}
-
-	if (statbuf.st_mode <= 0) {
-		printf("weird mode: %s\n", cmd[0]);
-
-		return 0;
-	}
-
-	if (!(S_IXUSR & statbuf.st_mode)) {
-		printf("not executable: %s\n", cmd[0]);
-
-		return 0;
-	}
-
-	switch (pid = fork()) {
+	switch (pid) {
 		case -1:
 			fprintf(stderr, "failed to fork properly");
 			exit(1);
@@ -577,15 +559,38 @@ xcbtools_event_spawn(xcb_window_t win, char *event_path)
 			return pid;
 	}
 
-	char **env = xcbtools_event_environment(win);
-	execve(cmd[0], cmd, env);
-	fprintf(stderr, "failed: %s\n", cmd[0]);
+	if (
+		stat(event_path, &statbuf) != 0 ||
+		statbuf.st_mode <= 0 ||
+		!(S_IXUSR & statbuf.st_mode)
+	) {
+		fprintf(stderr, "failed stat: %s\n", cmd[0]);
+
+		return 0;
+	}
+
+	int fd = open("/dev/null", O_WRONLY);
+
+	dup2(fd, 1);
+
+	close(fd);
+
+	execve(cmd[0], cmd, xcbtools_event_environment(win));
+	fprintf(stderr, "failed exec: %s\n", cmd[0]);
 
 	exit(1);
 }
 
 void
-xcbtools_win_usage(char *name, char *params)
+xcbtools_usage(char *name, char *params)
+{
+	xcbtools_usage_header(basename(name));
+	fprintf(stderr, "Usage:\n\t%s %s\n\n", basename(name), params);
+	exit(1);
+}
+
+void
+xcbtools_usage_window(char *name, char *params)
 {
 	char *win_params = (char *) malloc(16 + strlen(params));
 
@@ -598,14 +603,6 @@ xcbtools_win_usage(char *name, char *params)
 	strcat(win_params, "wid [..wid]");
 
 	xcbtools_usage(name, win_params);
-}
-
-void
-xcbtools_usage(char *name, char *params)
-{
-	xcbtools_usage_header(basename(name));
-	fprintf(stderr, "Usage:\n\t%s %s\n\n", basename(name), params);
-	exit(1);
 }
 
 void
@@ -623,7 +620,7 @@ xcbtools_mouse_center_window(xcb_connection_t conn, xcb_window_t win)
 	uint32_t values[1];
 	xcb_get_geometry_reply_t *geom;
 
-	geom = xcbtools_win_geometry(conn, win);
+	geom = xcbtools_window_geometry(conn, win);
 
 	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0,
 			(geom->width  + (geom->border_width * 2)) / 2,

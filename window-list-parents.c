@@ -11,7 +11,7 @@ void
 print_parents(xcb_window_t win)
 {
 	while (win != screen->root) {
-		win = xcbtools_win_parent(conn, win);
+		win = xcbtools_window_parent(conn, win);
 
 		printf("0x%08x ", win);
 	}
@@ -25,7 +25,7 @@ main(int argc, char **argv)
 	xcb_window_t win = 0;
 
 	if (argc < 2) {
-		xcbtools_win_usage(argv[0], "");
+		xcbtools_usage_window(argv[0], "");
 	}
 
 	xcbtools_conn_init(&conn);

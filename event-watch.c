@@ -22,7 +22,7 @@ main (int argc, char **argv)
 
 	xcbtools_event_register(conn, screen->root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
 
-	xcbtools_win_children(conn, screen->root, &win);
+	xcbtools_window_children(conn, screen->root, &win);
 
 	while (*win++) {
 		xcbtools_event_register(conn, *win, 0);

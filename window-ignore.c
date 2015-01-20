@@ -10,7 +10,7 @@ main(int argc, char **argv)
 	xcb_window_t win = 0;
 
 	if (argc < 2) {
-		xcbtools_win_usage(argv[0], "");
+		xcbtools_usage_window(argv[0], "");
 	}
 
 	xcbtools_conn_init(&conn);
@@ -18,7 +18,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbtools_win_ignore(conn, win, 1);
+		xcbtools_window_ignore(conn, win, 1);
 	}
 
 	xcbtools_conn_kill(&conn);

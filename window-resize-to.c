@@ -11,7 +11,7 @@ main(int argc, char **argv)
 	xcb_window_t win;
 
 	if (argc < 4) {
-		xcbtools_win_usage(argv[0], "width height");
+		xcbtools_usage_window(argv[0], "width height");
 	}
 
 	xcbtools_conn_init(&conn);
@@ -22,7 +22,7 @@ main(int argc, char **argv)
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
 
-		xcbtools_win_resize(conn, win, width, height);
+		xcbtools_window_resize(conn, win, width, height);
 	}
 
 	xcbtools_conn_kill(&conn);
