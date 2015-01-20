@@ -23,6 +23,7 @@ SRC = \
 	window-ignore.c \
 	window-raise.c \
 	window-lower.c \
+	window-reparent.c \
 	window-get-size.c \
 	window-get-position.c \
 	window-get-geometry.c \

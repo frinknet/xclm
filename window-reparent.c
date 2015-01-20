@@ -9,22 +9,22 @@ main(int argc, char **argv)
 {
 	int x, y;
 	xcb_window_t win;
-	xcb_get_geometry_reply_t *geom;
+	xcb_window_t parent;
 
-	if (argc < 4) {
-		xcbtools_usage_window(argv[0], "x y");
+	if (argc < 5) {
+		xcbtools_usage_window(argv[0], "parent x y");
 	}
 
 	xcbtools_conn_init(&conn);
 
+	parent = strtoul(*++argv, NULL, 16);
 	x = atoi(*++argv);
 	y = atoi(*++argv);
 
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
-		geom = xcbtools_window_geometry(conn, win);
 
-		xcbtools_window_move(conn, win, geom->x + x, geom->y + y);
+		xcb_reparent_window(conn, win, parent, x, y);
 	}
 
 	xcbtools_conn_kill(&conn);

@@ -16,8 +16,8 @@ main(int argc, char **argv)
 
 	xcbtools_conn_init(&conn);
 
-	width = atoi(*(++argv));
-	height = atoi(*(++argv));
+	width = atoi(*++argv);
+	height = atoi(*++argv);
 
 	while (*++argv) {
 		win = strtoul(*argv, NULL, 16);
