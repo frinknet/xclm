@@ -49,9 +49,10 @@ char *xcbtools_window_command(xcb_connection_t *, xcb_window_t);
 xcb_window_t xcbtools_window_current();
 
 void xcbtools_event_register(xcb_connection_t *, xcb_window_t, uint32_t);
-bool xcbtools_event_notify_valid(xcb_generic_event_t*);
+bool xcbtools_event_notify_valid(xcb_connection_t *, xcb_generic_event_t*);
+bool xcbtools_event_configure_valid(xcb_connection_t *, xcb_generic_event_t *);
 void xcbtools_event_loop(xcb_connection_t *, char *);
-bool xcbtools_event_trigger(xcb_connection_t *, xcb_window_t, char *, char *, bool);
+bool xcbtools_event_trigger(xcb_connection_t *, xcb_window_t, char *, char *);
 char **xcbtools_event_environment(xcb_window_t);
 pid_t xcbtools_event_spawn(xcb_window_t, char *, bool);
 

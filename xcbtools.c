@@ -289,9 +289,23 @@ xcbtools_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t type)
 }
 
 bool
-xcbtools_event_notify_valid(xcb_generic_event_t *event)
+xcbtools_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
+{
+	xcb_configure_notify_event_t *config;
+	xcb_screen_t *screen;
+
+	xcbtools_screen_init(conn, &screen);
+
+	config = (xcb_configure_notify_event_t*)event;
+
+	return (config->window == screen->root);
+}
+
+bool
+xcbtools_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 {
 	xcb_enter_notify_event_t *notify;
+
 	notify = (xcb_enter_notify_event_t*)event;
 
 	switch (notify->mode) {
@@ -309,135 +323,174 @@ void
 xcbtools_event_loop(xcb_connection_t *conn, char *event_dir)
 {
 	bool running = true;
-	bool spawn = true;
+	char *event_name = (char *) malloc(32);
 	xcb_generic_event_t *event;
-	char *event_name = "";
 
 
 	while (running) {
 		event = xcb_wait_for_event(conn);
 
-		switch (event->response_type & ~0x80) {
-		case XCB_ENTER_NOTIFY:
-			if (xcbtools_event_notify_valid(event)) {
-				xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "window-mouse-enter", event_dir, spawn);
-			}
+		switch (event->response_type) {
+			case 0:
+				break;
+			case XCB_KEY_PRESS:
+				xcbtools_event_trigger(conn, ((xcb_key_press_event_t*)event)->event, "key-down", event_dir);
 
-			break;
-		case XCB_LEAVE_NOTIFY:
-			if (xcbtools_event_notify_valid(event)) {
-				xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "window-mouse-leave", event_dir, spawn);
-			}
+				break;
+			case XCB_KEY_RELEASE:
+				xcbtools_event_trigger(conn, ((xcb_key_release_event_t*)event)->event, "key-up", event_dir);
 
-			break;
-		case XCB_GRAPHICS_EXPOSURE:
-			xcbtools_event_trigger(conn, 0, "window-graphics-expose", event_dir, spawn);
+				break;
+			case XCB_BUTTON_PRESS:
+				xcbtools_event_trigger(conn, ((xcb_button_press_event_t*)event)->event, "mouse-down", event_dir);
 
-			break;
-		case XCB_NO_EXPOSURE:
-			xcbtools_event_trigger(conn, 0, "window-no-expose", event_dir, spawn);
+				break;
+			case XCB_BUTTON_RELEASE:
+				xcbtools_event_trigger(conn, ((xcb_button_release_event_t*)event)->event, "mouse-up", event_dir);
 
-			break;
-		case XCB_VISIBILITY_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "window-visible", event_dir, spawn);
+				break;
+			case XCB_MOTION_NOTIFY:
+				if (xcbtools_event_notify_valid(conn, event)) {
+					xcbtools_event_trigger(conn, ((xcb_motion_notify_event_t*)event)->event, "mouse-move", event_dir);
+				}
 
-			break;
-		case XCB_REPARENT_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "window-reparent", event_dir, spawn);
+				break;
+			case XCB_ENTER_NOTIFY:
+				if (xcbtools_event_notify_valid(conn, event)) {
+					xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "mouse-in", event_dir);
+				}
 
-			break;
-		case XCB_CONFIGURE_REQUEST:
-			xcbtools_event_trigger(conn, 0, "configure-request", event_dir, spawn);
+				break;
+			case XCB_LEAVE_NOTIFY:
+				if (xcbtools_event_notify_valid(conn, event)) {
+					xcbtools_event_trigger(conn, ((xcb_enter_notify_event_t*)event)->event, "mouse-out", event_dir);
+				}
 
-			break;
-		case XCB_CONFIGURE_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "configure-notify", event_dir, spawn);
+				break;
+			case XCB_FOCUS_IN:
+				xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-focus", event_dir);
 
-			break;
-		case XCB_RESIZE_REQUEST:
-			xcbtools_event_trigger(conn, 0, "window-resize", event_dir, spawn);
+				break;
+			case XCB_FOCUS_OUT:
+				xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-blur", event_dir);
 
-			break;
-		case XCB_GRAVITY_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "gravity-notify", event_dir, spawn);
+				break;
+			case XCB_KEYMAP_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_button_release_event_t*)event)->event, "mouse-up", event_dir);
 
-			break;
-		case XCB_CIRCULATE_REQUEST:
-			xcbtools_event_trigger(conn, 0, "circulate-request", event_dir, spawn);
+				break;
+			case XCB_EXPOSE:
+				xcbtools_event_trigger(conn, ((xcb_expose_event_t*)event)->window, "window-expose", event_dir);
 
-			break;
-		case XCB_CIRCULATE_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "circulate-notify", event_dir, spawn);
+				break;
+			case XCB_GRAPHICS_EXPOSURE:
+				xcbtools_event_trigger(conn, 0, "graphics-exposure", event_dir);
 
-			break;
-		case XCB_PROPERTY_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "property-notify", event_dir, spawn);
+				break;
+			case XCB_NO_EXPOSURE:
+				xcbtools_event_trigger(conn, 0, "no-exposure", event_dir);
 
-			break;
-		case XCB_SELECTION_CLEAR:
-			xcbtools_event_trigger(conn, 0, "selection-clear", event_dir, spawn);
+				break;
+			case XCB_VISIBILITY_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_visibility_notify_event_t*)event)->window, "window-visibility", event_dir);
 
-			break;
-		case XCB_SELECTION_REQUEST:
-			xcbtools_event_trigger(conn, 0, "selection-request", event_dir, spawn);
+				break;
+			case XCB_CREATE_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-create", event_dir);
 
-			break;
-		case XCB_SELECTION_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "selection-notify", event_dir, spawn);
+				xcbtools_event_register(conn, ((xcb_create_notify_event_t*)event)->window, 0);
 
-			break;
-		case XCB_COLORMAP_NOTIFY:
-			xcbtools_event_trigger(conn, 0, "colormap-notify", event_dir, spawn);
+				break;
+			case XCB_DESTROY_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-destroy", event_dir);
 
-			break;
-		case XCB_FOCUS_IN:
-			xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-focus", event_dir, spawn);
+				break;
+			case XCB_UNMAP_NOTIFY:
+				if (xcbtools_event_configure_valid(conn, event)) {
+					xcbtools_event_trigger(conn, ((xcb_unmap_notify_event_t*)event)->window, "window-hide", event_dir);
+				}
 
-			break;
-		case XCB_FOCUS_OUT:
-			xcbtools_event_trigger(conn, ((xcb_focus_in_event_t*)event)->event, "window-blur", event_dir, spawn);
+				break;
+			case XCB_MAP_NOTIFY:
+				if (xcbtools_event_configure_valid(conn, event)) {
+					xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-show", event_dir);
+				}
 
-			break;
-		case XCB_CLIENT_MESSAGE:
-			xcbtools_event_trigger(conn, 0, "client-message", event_dir, spawn);
+				break;
+			case XCB_MAP_REQUEST:
+				xcbtools_event_trigger(conn, ((xcb_map_request_event_t*)event)->window, "map-request", event_dir);
 
-			break;
-		case XCB_MAP_REQUEST:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-map-request", event_dir, spawn);
+				break;
+			case XCB_REPARENT_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_reparent_notify_event_t*)event)->window, "window-reparent", event_dir);
 
-			break;
-		case XCB_MAP_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-mapped", event_dir, spawn);
+				break;
+			case XCB_CONFIGURE_NOTIFY:
+				if (xcbtools_event_configure_valid(conn, event)) {
+					xcbtools_event_trigger(conn, ((xcb_configure_notify_event_t*)event)->window, "config-finish", event_dir);
+				}
 
-			break;
-		case XCB_UNMAP_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-unmapped", event_dir, spawn);
+				break;
+			case XCB_CONFIGURE_REQUEST:
+				if (xcbtools_event_configure_valid(conn, event)) {
+					xcbtools_event_trigger(conn, ((xcb_configure_request_event_t*)event)->window, "config-begin", event_dir);
+				}
 
-			break;
-		case XCB_MAPPING_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_map_notify_event_t*)event)->window, "window-mapping", event_dir, spawn);
+				break;
+			case XCB_GRAVITY_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_gravity_notify_event_t*)event)->window, "gravity", event_dir);
 
-			break;
-		case XCB_DESTROY_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-destroy", event_dir, spawn);
+				break;
+			case XCB_RESIZE_REQUEST:
+				xcbtools_event_trigger(conn, ((xcb_resize_request_event_t*)event)->window, "window-resize", event_dir);
 
-			break;
-		case XCB_CREATE_NOTIFY:
-			xcbtools_event_trigger(conn, ((xcb_create_notify_event_t*)event)->window, "window-create", event_dir, spawn);
+				break;
+			case XCB_CIRCULATE_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_circulate_notify_event_t*)event)->window, "restack-finish", event_dir);
 
-			xcbtools_event_register(conn, ((xcb_create_notify_event_t*)event)->window, 0);
+				break;
+			case XCB_CIRCULATE_REQUEST:
+				xcbtools_event_trigger(conn, ((xcb_circulate_request_event_t*)event)->window, "restack-start", event_dir);
 
-			break;
-		default:
-			sprintf(event_name, "unknow-event-%d", event->response_type);
+				break;
+			case XCB_PROPERTY_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_property_notify_event_t*)event)->window, "property-change", event_dir);
 
-			xcbtools_event_trigger(conn, 0, event_name, event_dir, spawn);
+				break;
+			case XCB_SELECTION_CLEAR:
+				xcbtools_event_trigger(conn, ((xcb_selection_clear_event_t*)event)->owner, "select-clear", event_dir);
+
+				break;
+			case XCB_SELECTION_REQUEST:
+				xcbtools_event_trigger(conn, ((xcb_selection_request_event_t*)event)->owner, "select-begin", event_dir);
+
+				break;
+			case XCB_SELECTION_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_selection_notify_event_t*)event)->requestor, "select-finish", event_dir);
+
+				break;
+			case XCB_COLORMAP_NOTIFY:
+				xcbtools_event_trigger(conn, ((xcb_colormap_notify_event_t*)event)->window, "colormap-change", event_dir);
+
+				break;
+			case XCB_CLIENT_MESSAGE:
+				xcbtools_event_trigger(conn, ((xcb_client_message_event_t*)event)->window, "client-message", event_dir);
+
+				break;
+			case XCB_MAPPING_NOTIFY:
+				xcbtools_event_trigger(conn, 0, "keymap-change", event_dir);
+
+				break;
+			default:
+				sprintf(event_name, "unknow-event-%d", event->response_type);
+
+				xcbtools_event_trigger(conn, 0, event_name, event_dir);
 		}
 	}
 }
 
 bool
-xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, char *event_dir, bool spawn)
+xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, char *event_dir)
 {
 	char *event_path = (char *) malloc(1 + strlen(event_name) + strlen(event_dir? event_dir : "~/.events"));
 	char *event_cmd;
@@ -450,7 +503,7 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 	if (win && !xcbtools_window_ignored(conn, win)) {
 		printf("event-trigger %s 0x%08x\n", event_name, win);
 	} else {
-		printf("event-trigger %s\n", event_name);
+		return false;
 	}
 
 	fflush(stdout);
@@ -458,7 +511,7 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 	dir = opendir(event_path);
 
 	if (dir == NULL) {
-		fprintf(stderr, "No directory %s\n", event_path);
+		//fprintf(stderr, "failed dir: %s\n", event_path);
 
 		return false;
 	}
@@ -475,7 +528,7 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 
 		sprintf(event_cmd, "%s/%s", event_path, entry->d_name);
 
-		xcbtools_event_spawn(win, event_cmd, spawn);
+		xcbtools_event_spawn(win, event_cmd, true);
 	}
 
 	closedir(dir);
@@ -537,46 +590,45 @@ xcbtools_event_environment(xcb_window_t win)
 }
 
 pid_t
-xcbtools_event_spawn(xcb_window_t win, char *event_path, bool spawn)
+xcbtools_event_spawn(xcb_window_t win, char *cmd_path, bool spawn)
 {
-	pid_t pid = spawn? fork() : 0;
+	pid_t pid;
 	struct stat statbuf;
 	char *cmd[] = {
-		event_path,
+		cmd_path,
 		NULL
 	};
+	int fd;
 
-
-	switch (pid) {
+	switch (pid = spawn? fork() : 0) {
 		case -1:
-			fprintf(stderr, "failed to fork properly");
+			fprintf(stderr, "failed to fork properly\n");
 			exit(1);
 
 			break;
 		case 0:
+			fd = open("/dev/null", O_WRONLY);
+
+			dup2(fd, 1);
+			close(fd);
+
 			break;
 		default:
 			return pid;
 	}
 
 	if (
-		stat(event_path, &statbuf) != 0 ||
+		stat(cmd_path, &statbuf) != 0 ||
 		statbuf.st_mode <= 0 ||
 		!(S_IXUSR & statbuf.st_mode)
 	) {
-		fprintf(stderr, "failed stat: %s\n", cmd[0]);
+		fprintf(stderr, "failed stat: %s\n", cmd_path);
 
 		return 0;
 	}
 
-	int fd = open("/dev/null", O_WRONLY);
-
-	dup2(fd, 1);
-
-	close(fd);
-
-	execve(cmd[0], cmd, xcbtools_event_environment(win));
-	fprintf(stderr, "failed exec: %s\n", cmd[0]);
+	execve(cmd_path, cmd, xcbtools_event_environment(win));
+	fprintf(stderr, "failed exec: %s\n", cmd_path);
 
 	exit(1);
 }

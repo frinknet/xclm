@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "Bash test" 1>&2
+env
