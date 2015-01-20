@@ -293,10 +293,8 @@ xcbtools_window_current(xcb_connection_t *conn)
 void
 xcbtools_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t type)
 {
-	uint32_t values[1];
+	uint32_t values[] = { type };
 	uint32_t mask = XCB_CW_EVENT_MASK;
-
-	values[0] = type;
 
 	xcb_change_window_attributes(conn, win, mask, values);
 	xcb_flush(conn);
