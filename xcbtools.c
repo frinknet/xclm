@@ -492,6 +492,7 @@ xcbtools_event_environment(xcb_window_t win)
 	char *cmd_dir = getenv("COMMANDS");
 	char *env[5];
 
+
 	env[0] = (char *) malloc(32);
 
 	if (win) {
@@ -529,15 +530,9 @@ xcbtools_event_environment(xcb_window_t win)
 
 	env[4] = NULL;
 
-	char **ret = malloc(sizeof env);
+	char **ret = malloc(sizeof(env));
 
-	ret = env;
-
-	printf("ret[0] %s\n", ret[0]);
-	printf("ret[1] %s\n", ret[1]);
-	printf("ret[2] %s\n", ret[2]);
-	printf("ret[3] %s\n", ret[3]);
-	printf("ret[4] %s\n", ret[4]);
+	memcpy(ret, env, sizeof(env));
 
 	return ret;
 }
@@ -547,17 +542,10 @@ xcbtools_event_spawn(xcb_window_t win, char *event_path)
 {
 	pid_t pid;
 	struct stat statbuf;
-	char **env = xcbtools_event_environment(win);
 	char *cmd[2] = {
 		event_path,
 		NULL
 	};
-
-	printf("env[0] %s\n", env[0]);
-	printf("env[1] %s\n", env[1]);
-	printf("env[2] %s\n", env[2]);
-	printf("env[3] %s\n", env[3]);
-	printf("env[4] %s\n", env[4]);
 
 	if (stat(event_path, &statbuf) != 0) {
 		printf("can't stat: %s\n", cmd[0]);
@@ -589,6 +577,7 @@ xcbtools_event_spawn(xcb_window_t win, char *event_path)
 			return pid;
 	}
 
+	char **env = xcbtools_event_environment(win);
 	execve(cmd[0], cmd, env);
 	fprintf(stderr, "failed: %s\n", cmd[0]);
 
