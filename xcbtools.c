@@ -342,7 +342,7 @@ xcbtools_event_loop(xcb_connection_t *conn, char *event_dir)
 	while (running) {
 		event = xcb_wait_for_event(conn);
 
-		switch (event->response_type) {
+		switch (event->response_type & ~0x80) {
 			case 0:
 				break;
 			case XCB_KEY_PRESS:
