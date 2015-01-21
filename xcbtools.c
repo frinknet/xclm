@@ -512,7 +512,9 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 
 	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", event_name);
 
-	if (win && !xcbtools_window_ignored(conn, win)) {
+	if (!win) {
+		printf("event-trigger %s\n", event_name);
+	} else if (!xcbtools_window_ignored(conn, win)) {
 		printf("event-trigger %s 0x%08x\n", event_name, win);
 	} else {
 		return false;

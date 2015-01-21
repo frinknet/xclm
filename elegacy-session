@@ -23,16 +23,19 @@ done
 
 # Elegacy Environment
 export ELEGACY="${XDG_CONFIG_HOME:-"$HOME/.config"}/elegacy"
-export XCBTOOLS="/xtra/record/self/xcbtools"
+export XCBTOOLS="/usr/share/xcbtools"
 export COMMANDS="$XCBTOOLS:$ELEGACY/commands"
 export EVENTS="$ELEGACY/events"
 export PATH="$PATH:$COMMANDS"
 
 # Build default events
 if [ ! -d "$EVENTS" ]; then
+	mkdir -p "$ELEGACY"
 	cp -r "$XCBTOOLS/events" "$ELEGACY"
 fi
 
+mkfifo "$ELEGACY/fifo"
+
 # Start daemon
 event-trigger session-start
-event-watch "$EVENTS"
+event-watch "$EVENTS" > "$ELEGACY/fifo"

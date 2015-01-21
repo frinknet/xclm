@@ -2,6 +2,7 @@ include config.mk
 
 HDR = xcbtools.h
 SRC = \
+	create-window.c \
 	current-root.c \
 	current-window.c \
 	event-watch.c \
@@ -75,16 +76,18 @@ $(OBJ): $(HDR) xcbtools.o
 install: $(BIN)
 	mkdir -p $(DESTDIR)$(PREFIX)/share/xcbtools/
 	cp -f $(BIN) $(DESTDIR)$(PREFIX)/share/xcbtools/
+	cp -f events $(DESTDIR)$(PREFIX)/share/xcbtools/
 	cp -f elegacy-session $(DESTDIR)$(PREFIX)/share/xcbtools/
-	cp -f elegacy.desktop $(DESTDIR)$(PREFIX)/share/xsession/
+	cp -f elegacy.desktop $(DESTDIR)$(PREFIX)/share/xsessions/
 
 uninstall:
 	@echo "uninstalling binaries"
 	@for util in $(BIN); do \
 		rm -f $(DESTDIR)$(PREFIX)/share/xcbtools/$$util; \
 	done
+	rm -rf $(DESTDIR)$(PREFIX)/share/xcbtools/events
 	rm -f $(DESTDIR)$(PREFIX)/share/xcbtools/elegacy-session
-	rm -f $(DESTDIR)$(PREFIX)/share/xsession/elegacy.desktop
+	rm -f $(DESTDIR)$(PREFIX)/share/xsessions/elegacy.desktop
 
 clean:
 	rm -f $(OBJ) $(BIN) xcbtools.o
