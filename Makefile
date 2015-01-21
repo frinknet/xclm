@@ -73,16 +73,18 @@ $(OBJ): $(HDR) xcbtools.o
 	@$(CC) -c $< -o $@ $(CFLAGS)
 
 install: $(BIN)
-	mkdir -p $(DESTDIR)$(PREFIX)/bin/
-	cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin/
-	cd man; $(MAKE) $(MFLAGS) install
+	mkdir -p $(DESTDIR)$(PREFIX)/share/xcbtools/
+	cp -f $(BIN) $(DESTDIR)$(PREFIX)/share/xcbtools/
+	cp -f elegacy-session $(DESTDIR)$(PREFIX)/share/xcbtools/
+	cp -f elegacy.desktop $(DESTDIR)$(PREFIX)/share/xsession/
 
 uninstall:
 	@echo "uninstalling binaries"
 	@for util in $(BIN); do \
-		rm -f $(DESTDIR)$(PREFIX)/bin/$$util; \
+		rm -f $(DESTDIR)$(PREFIX)/share/xcbtools/$$util; \
 	done
-	cd man; $(MAKE) $(MFLAGS) uninstall
+	rm -f $(DESTDIR)$(PREFIX)/share/xcbtools/elegacy-session
+	rm -f $(DESTDIR)$(PREFIX)/share/xsession/elegacy.desktop
 
 clean:
 	rm -f $(OBJ) $(BIN) xcbtools.o
