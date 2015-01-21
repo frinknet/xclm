@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Trap everything started signalled when this script exits or dies.
+cleanexit() {
+	event-trigger session-end
+
+	for child in $(jobs -p); do
+		jobs -p | grep -q $child && kill $child
+	done
+}
+
+trap cleanexit EXIT SIGHUP SIGINT SIGTERM
+
+# Environment and autostart:
+sourceprofile=(
+	"/etc/profile"
+	"${HOME}/.profile"
+)
+
+for file in "${sourceprofile[@]}"; do
+	[ -r "${file}" ] && . "${file}"
+done
+
+# Elegacy Environment
+export ELEGACY="${XDG_CONFIG_HOME:-"$HOME/.config"}/elegacy"
+export XCBTOOLS="/xtra/record/self/xcbtools"
+export COMMANDS="$XCBTOOLS:$ELEGACY/commands"
+export EVENTS="$ELEGACY/events"
+export PATH="$PATH:$COMMANDS"
+
+# Build default events
+if [ ! -d "$EVENTS" ]; then
+	cp -r "$XCBTOOLS/events" "$ELEGACY"
+fi
+
+# Start daemon
+event-trigger session-start
+event-watch "$EVENTS"

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Elegacy Desktop
+Comment=Launch Elegacy Desktop
+Exec=/usr/bin/elegacy
+Type=XSession
