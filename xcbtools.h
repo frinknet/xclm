@@ -27,7 +27,8 @@ void xcbtools_conn_kill(xcb_connection_t **);
 void xcbtools_screen_init(xcb_connection_t *, xcb_screen_t **);
 void xcbtools_color_init(xcb_connection_t *, xcb_screen_t *, xcb_colormap_t *, xcb_visualid_t *);
 
-void xcbtools_window_border(xcb_connection_t *, xcb_window_t, int, int);
+void xcbtools_window_border(xcb_connection_t *, xcb_window_t, uint32_t, uint32_t);
+void xcbtools_window_background(xcb_connection_t *, xcb_window_t, uint32_t);
 void xcbtools_window_stack(xcb_connection_t *, xcb_window_t, uint32_t);
 void xcbtools_window_ignore(xcb_connection_t *, xcb_window_t, int);
 void xcbtools_window_move(xcb_connection_t *, xcb_window_t, int, int);
@@ -39,6 +40,7 @@ int xcbtools_window_mapped(xcb_connection_t *, xcb_window_t);
 int xcbtools_window_ignored(xcb_connection_t *, xcb_window_t);
 int xcbtools_window_children(xcb_connection_t *, xcb_window_t, xcb_window_t **);
 
+xcb_window_t xcbtools_window_create( xcb_connection_t *, int, int, int, int);
 xcb_window_t xcbtools_window_parent(xcb_connection_t *, xcb_window_t);
 xcb_get_geometry_reply_t *xcbtools_window_geometry(xcb_connection_t *, xcb_window_t);
 xcb_get_window_attributes_reply_t *xcbtools_window_attributes(xcb_connection_t *, xcb_window_t);

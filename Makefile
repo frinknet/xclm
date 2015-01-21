@@ -20,6 +20,7 @@ SRC = \
 	window-hide.c \
 	window-toggle.c \
 	window-border.c \
+	window-background.c \
 	window-manage.c \
 	window-ignore.c \
 	window-raise.c \

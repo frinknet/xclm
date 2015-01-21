@@ -85,22 +85,26 @@ xcbtools_window_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 void
 xcbtools_window_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
-	uint32_t mask = XCB_CW_OVERRIDE_REDIRECT;
-	uint32_t value[] = { override };
-
-	xcb_change_window_attributes(conn, win, mask, value);
+	xcb_change_window_attributes(conn, win, XCB_CW_OVERRIDE_REDIRECT, (uint32_t[]){ override });
+	xcb_flush(conn);
 }
 
 void
-xcbtools_window_border(xcb_connection_t *conn, xcb_window_t win, int size, int color)
+xcbtools_window_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color)
 {
-	int mask = XCB_CONFIG_WINDOW_BORDER_WIDTH | XCB_CW_BORDER_PIXEL;
-	uint32_t values[] = {
-		size,
-		color
-	};
+	xcb_change_window_attributes(conn, win, XCB_CW_BACK_PIXEL, (uint32_t[]){ color });
 
-	xcb_configure_window(conn, win, mask, values);
+	xcb_get_geometry_reply_t *geom = xcbtools_window_geometry(conn, win);
+	xcb_clear_area(conn, 1, win, 0, 0, geom->width, geom->height);
+
+	xcb_flush(conn);
+}
+
+void
+xcbtools_window_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color)
+{
+	xcb_change_window_attributes(conn, win, XCB_CW_BORDER_PIXEL, (uint32_t[]){ color });
+	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_BORDER_WIDTH, (uint32_t[]){ size });
 
 	xcb_flush(conn);
 }
@@ -108,53 +112,44 @@ xcbtools_window_border(xcb_connection_t *conn, xcb_window_t win, int size, int c
 void
 xcbtools_window_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
 {
-	uint32_t mask = XCB_CONFIG_WINDOW_STACK_MODE;
-	uint32_t value[] = { stack };
-
-	xcb_configure_window(conn, win, mask, value);
+	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE, (uint32_t[]){ stack });
+	xcb_flush(conn);
 }
 
 void
 xcbtools_window_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
 {
-	uint32_t values[2];
-	uint32_t mask = XCB_CONFIG_WINDOW_WIDTH
-					| XCB_CONFIG_WINDOW_HEIGHT;
-
-	values[0] = width;
-	values[1] = height;
-
-	xcb_configure_window(conn, win, mask, values);
+	xcb_configure_window(
+		conn, win,
+		XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+		(uint32_t[]){ width, height }
+	);
+	xcb_flush(conn);
 }
 
 void
 xcbtools_window_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
-	uint32_t values[2];
-	uint32_t mask = XCB_CONFIG_WINDOW_X
-					| XCB_CONFIG_WINDOW_Y;
-
-	values[0] = x;
-	values[1] = y;
-
-	xcb_configure_window(conn, win, mask, values);
+	xcb_configure_window(
+		conn, win,
+		XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+		(uint32_t[]){ x, y }
+	);
+	xcb_flush(conn);
 }
 
 void
 xcbtools_window_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
 {
-	uint32_t values[4];
-	uint32_t mask = XCB_CONFIG_WINDOW_X
-					| XCB_CONFIG_WINDOW_Y
-					| XCB_CONFIG_WINDOW_WIDTH
-					| XCB_CONFIG_WINDOW_HEIGHT;
-
-	values[0] = x;
-	values[1] = y;
-	values[2] = width;
-	values[3] = height;
-
-	xcb_configure_window(conn, win, mask, values);
+	xcb_configure_window(
+		conn, win,
+			XCB_CONFIG_WINDOW_X |
+			XCB_CONFIG_WINDOW_Y |
+			XCB_CONFIG_WINDOW_WIDTH |
+			XCB_CONFIG_WINDOW_HEIGHT,
+		(uint32_t[]){ x, y, width, height }
+	);
+	xcb_flush(conn);
 }
 
 xcb_get_geometry_reply_t *
@@ -272,6 +267,74 @@ xcbtools_window_parent(xcb_connection_t *conn, xcb_window_t win)
 	free(reply);
 
 	return parent;
+}
+
+xcb_window_t
+xcbtools_window_create(
+	xcb_connection_t *conn,
+	int x,
+	int y,
+	int width,
+	int height
+)
+{
+	xcb_window_t win = xcb_generate_id(conn);
+	xcb_screen_t *screen;
+	xcb_colormap_t colormap;
+	xcb_visualid_t visual;
+
+	xcbtools_screen_init(conn, &screen);
+	xcbtools_color_init(conn, screen, &colormap, &visual);
+
+	xcb_create_window(
+		conn,
+		(visual == screen->root_visual)? XCB_COPY_FROM_PARENT : 32,
+		win,
+		screen->root,
+		x, y, width, height, 0,
+		XCB_WINDOW_CLASS_INPUT_OUTPUT,
+		visual,
+			XCB_CW_BACK_PIXEL |
+			XCB_CW_BORDER_PIXEL |
+			XCB_CW_OVERRIDE_REDIRECT |
+			XCB_CW_EVENT_MASK |
+			XCB_CW_COLORMAP,
+		(unsigned int[]) {
+			0,
+			0,
+			0,
+			XCB_EVENT_MASK_NO_EVENT
+			| XCB_EVENT_MASK_KEY_PRESS
+			| XCB_EVENT_MASK_KEY_RELEASE
+			| XCB_EVENT_MASK_BUTTON_PRESS
+			| XCB_EVENT_MASK_BUTTON_RELEASE
+			| XCB_EVENT_MASK_ENTER_WINDOW
+			| XCB_EVENT_MASK_LEAVE_WINDOW
+			| XCB_EVENT_MASK_POINTER_MOTION
+			| XCB_EVENT_MASK_POINTER_MOTION_HINT
+			| XCB_EVENT_MASK_BUTTON_1_MOTION
+			| XCB_EVENT_MASK_BUTTON_2_MOTION
+			| XCB_EVENT_MASK_BUTTON_3_MOTION
+			| XCB_EVENT_MASK_BUTTON_4_MOTION
+			| XCB_EVENT_MASK_BUTTON_5_MOTION
+			| XCB_EVENT_MASK_BUTTON_MOTION
+			| XCB_EVENT_MASK_KEYMAP_STATE
+			| XCB_EVENT_MASK_EXPOSURE
+			| XCB_EVENT_MASK_VISIBILITY_CHANGE
+			| XCB_EVENT_MASK_STRUCTURE_NOTIFY
+			| XCB_EVENT_MASK_RESIZE_REDIRECT
+			| XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
+			| XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
+			| XCB_EVENT_MASK_FOCUS_CHANGE
+			| XCB_EVENT_MASK_PROPERTY_CHANGE
+			| XCB_EVENT_MASK_COLOR_MAP_CHANGE
+			| XCB_EVENT_MASK_OWNER_GRAB_BUTTON,
+			colormap
+		});
+
+	xcb_flush(conn);
+
+	return win;
 }
 
 char *
