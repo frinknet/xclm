@@ -76,7 +76,7 @@ $(OBJ): $(HDR) xcbtools.o
 install: $(BIN)
 	mkdir -p $(DESTDIR)$(PREFIX)/share/xcbtools/
 	cp -f $(BIN) $(DESTDIR)$(PREFIX)/share/xcbtools/
-	cp -f events $(DESTDIR)$(PREFIX)/share/xcbtools/
+	cp -rf events $(DESTDIR)$(PREFIX)/share/xcbtools/
 	cp -f elegacy-session $(DESTDIR)$(PREFIX)/share/xcbtools/
 	cp -f elegacy.desktop $(DESTDIR)$(PREFIX)/share/xsessions/
 

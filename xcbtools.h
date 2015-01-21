@@ -25,6 +25,7 @@ void xcbtools_conn_init(xcb_connection_t **);
 void xcbtools_conn_kill(xcb_connection_t **);
 
 void xcbtools_screen_init(xcb_connection_t *, xcb_screen_t **);
+void xcbtools_color_init(xcb_connection_t *, xcb_screen_t *, xcb_colormap_t *, xcb_visualid_t *);
 
 void xcbtools_window_border(xcb_connection_t *, xcb_window_t, int, int);
 void xcbtools_window_stack(xcb_connection_t *, xcb_window_t, uint32_t);

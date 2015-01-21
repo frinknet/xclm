@@ -29,6 +29,30 @@ xcbtools_screen_init(xcb_connection_t *conn, xcb_screen_t **screen)
 	}
 }
 
+void
+xcbtools_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *colormap, xcb_visualid_t *visual)
+{
+	xcb_depth_iterator_t depth;
+
+	*colormap = xcb_generate_id(conn);
+	*visual = screen->root_visual;
+	depth = xcb_screen_allowed_depths_iterator(screen);
+
+	while (depth.rem) {
+		xcb_visualtype_t *type = xcb_depth_visuals(depth.data);
+
+		if (depth.data->depth == 32) {
+			*visual = type->visual_id;
+
+			break;
+		}
+
+		xcb_depth_next(&depth);
+	}
+
+	xcb_create_colormap(conn, XCB_COLORMAP_ALLOC_NONE, *colormap, screen->root, *visual);
+}
+
 xcb_get_window_attributes_reply_t *
 xcbtools_window_attributes(xcb_connection_t *conn, xcb_window_t win)
 {
