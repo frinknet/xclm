@@ -2,12 +2,12 @@ include config.mk
 
 HDR = xcbtools.h
 SRC = \
-	create-window.c \
 	current-root.c \
 	current-window.c \
 	event-watch.c \
 	event-trigger.c \
 	event-test.c \
+	window-create.c \
 	window-focus.c \
 	window-kill.c \
 	window-move-by.c \

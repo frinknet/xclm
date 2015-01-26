@@ -32,29 +32,44 @@ static uint32_t mask = XCB_EVENT_MASK_NO_EVENT
 					| XCB_EVENT_MASK_OWNER_GRAB_BUTTON;
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
-	xcb_window_t *win;
+	int x, y, width, height;
+	xcb_window_t win, parent;
 	char *event_dir;
+	char *events;
+	char *winclass;
+
+	if (argc < 7) {
+		xcbtools_usage(argv[0], "parent x y width height class");
+	}
 
 	xcbtools_conn_init(&conn);
 	xcbtools_screen_init(conn, &screen);
 
-	if (argc < 2) {
-		xcbtools_usage(argv[0], "event-dir");
+	parent = strtoul(*++argv, NULL, 16);
+	x = atoi(*++argv);
+	y = atoi(*++argv);
+	width = atoi(*++argv);
+	height = atoi(*++argv);
+	winclass = *++argv;
+
+	win = xcbtools_window_create(conn, parent, x, y, width, height);
+
+	events = getenv("EVENTS");
+	event_dir = malloc(1 + strlen(events? events : "~/.events") + strlen(winclass));
+
+	sprintf(event_dir, "%s/%s", events? events : "~/.events", winclass);
+	printf("0x%08x\n", win);
+
+	xcbtools_daemonize("/dev/null", "/dev/null");
+
+	while (true) {
+		sleep(10);
 	}
 
-	event_dir = argv[1];
-
-	xcbtools_event_register(conn, screen->root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
-
-	xcbtools_window_children(conn, screen->root, &win);
-
-	while (*win++) {
-		xcbtools_event_register(conn, *win, mask);
-	}
-
-	xcbtools_event_loop(conn, event_dir);
+	//xcbtools_event_register(conn, win, mask);
+	//xcbtools_event_loop(conn, event_dir);
 
 	xcbtools_conn_kill(&conn);
 

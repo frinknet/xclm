@@ -24,11 +24,9 @@ main(int argc, char **argv)
 		win = strtoul(*argv, NULL, 16);
 		geom = xcbtools_window_geometry(conn, win);
 
-		xcbtools_window_warp(
+		xcbtools_window_resize(
 			conn,
 			win,
-			geom->x - (width / 2),
-			geom->y - (height / 2),
 			geom->width + width,
 			geom->height + height
 		);

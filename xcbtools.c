@@ -1,6 +1,28 @@
 #include "xcbtools.h"
 
 void
+xcbtools_daemonize(char *out, char *err)
+{
+	int fout, ferr;
+
+	fout = open(out, O_WRONLY);
+	ferr = open(err, O_WRONLY);
+
+	fflush(stdout);
+	fflush(stderr);
+
+	dup2(fout, 1);
+	dup2(ferr, 2);
+
+	close(fout);
+	close(ferr);
+
+	if (fork()) {
+		exit(0);
+	}
+}
+
+void
 xcbtools_conn_init(xcb_connection_t **conn)
 {
 	*conn = xcb_connect(NULL, NULL);
@@ -272,6 +294,7 @@ xcbtools_window_parent(xcb_connection_t *conn, xcb_window_t win)
 xcb_window_t
 xcbtools_window_create(
 	xcb_connection_t *conn,
+	xcb_window_t parent,
 	int x,
 	int y,
 	int width,
@@ -290,7 +313,7 @@ xcbtools_window_create(
 		conn,
 		(visual == screen->root_visual)? XCB_COPY_FROM_PARENT : 32,
 		win,
-		screen->root,
+		parent,
 		x, y, width, height, 0,
 		XCB_WINDOW_CLASS_INPUT_OUTPUT,
 		visual,
@@ -302,7 +325,7 @@ xcbtools_window_create(
 		(unsigned int[]) {
 			0,
 			0,
-			0,
+			1,
 			XCB_EVENT_MASK_NO_EVENT
 			| XCB_EVENT_MASK_KEY_PRESS
 			| XCB_EVENT_MASK_KEY_RELEASE
