@@ -16,8 +16,8 @@
 #ifndef XCBTOOLS_H__
 #define XCBTOOLS_H__
 
-#define XCBTOOLS_SUITE "XCB Tools"
-#define XCBTOOLS_VERSION "1.2"
+#define XCBTOOLS_SUITE "XCMD"
+#define XCBTOOLS_VERSION "1.4"
 #define XCBTOOLS_COPYRIGHT "2014-2015 FRINKnet and Lemurs"
 #define XCBTOOLS_LICENSE "MIT LICENSE: http://lemurs.mit-license.org"
 
@@ -50,11 +50,15 @@ xcb_get_geometry_reply_t *xcbtools_window_geometry(xcb_connection_t *conn, xcb_w
 xcb_get_window_attributes_reply_t *xcbtools_window_attributes(xcb_connection_t *conn, xcb_window_t win);
 
 char *xcbtools_window_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop);
+char *xcbtools_window_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name);
+
 char *xcbtools_window_name(xcb_connection_t *conn, xcb_window_t win);
 char *xcbtools_window_class(xcb_connection_t *conn, xcb_window_t win);
 char *xcbtools_window_command(xcb_connection_t *conn, xcb_window_t win);
 
 xcb_window_t xcbtools_window_current(xcb_connection_t *conn);
+
+xcb_atom_t xcbtools_atom(xcb_connection_t *conn, char *atom_name);
 
 void xcbtools_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask);
 bool xcbtools_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t* event);

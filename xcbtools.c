@@ -88,14 +88,23 @@ xcbtools_window_attributes(xcb_connection_t *conn, xcb_window_t win)
 }
 
 char *
+xcbtools_window_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name)
+{
+	xcb_atom_t atom;
+
+	atom = xcbtools_atom(conn, atom_name);
+
+	return xcbtools_window_property(conn, win, atom);
+}
+
+char *
 xcbtools_window_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
 {
 	xcb_get_property_cookie_t cookie;
 	xcb_get_property_reply_t *reply;
 	char *value;
 
-	cookie = xcb_get_property(conn, 0, win,
-			prop, XCB_ATOM_STRING, 0L, 32L);
+	cookie = xcb_get_property(conn, 0, win, prop, XCB_ATOM_STRING, 0L, 32L);
 	reply = xcb_get_property_reply(conn, cookie, NULL);
 	value = xcb_get_property_value(reply);
 
@@ -317,41 +326,16 @@ xcbtools_window_create(
 		x, y, width, height, 0,
 		XCB_WINDOW_CLASS_INPUT_OUTPUT,
 		visual,
-			XCB_CW_BACK_PIXEL |
+			//XCB_CW_BACK_PIXEL |
 			XCB_CW_BORDER_PIXEL |
-			XCB_CW_OVERRIDE_REDIRECT |
-			XCB_CW_EVENT_MASK |
+			//XCB_CW_OVERRIDE_REDIRECT |
+			//XCB_CW_EVENT_MASK |
 			XCB_CW_COLORMAP,
 		(unsigned int[]) {
+			//0,
 			0,
-			0,
-			1,
-			XCB_EVENT_MASK_NO_EVENT
-			| XCB_EVENT_MASK_KEY_PRESS
-			| XCB_EVENT_MASK_KEY_RELEASE
-			| XCB_EVENT_MASK_BUTTON_PRESS
-			| XCB_EVENT_MASK_BUTTON_RELEASE
-			| XCB_EVENT_MASK_ENTER_WINDOW
-			| XCB_EVENT_MASK_LEAVE_WINDOW
-			| XCB_EVENT_MASK_POINTER_MOTION
-			| XCB_EVENT_MASK_POINTER_MOTION_HINT
-			| XCB_EVENT_MASK_BUTTON_1_MOTION
-			| XCB_EVENT_MASK_BUTTON_2_MOTION
-			| XCB_EVENT_MASK_BUTTON_3_MOTION
-			| XCB_EVENT_MASK_BUTTON_4_MOTION
-			| XCB_EVENT_MASK_BUTTON_5_MOTION
-			| XCB_EVENT_MASK_BUTTON_MOTION
-			| XCB_EVENT_MASK_KEYMAP_STATE
-			| XCB_EVENT_MASK_EXPOSURE
-			| XCB_EVENT_MASK_VISIBILITY_CHANGE
-			| XCB_EVENT_MASK_STRUCTURE_NOTIFY
-			| XCB_EVENT_MASK_RESIZE_REDIRECT
-			| XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-			| XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
-			| XCB_EVENT_MASK_FOCUS_CHANGE
-			| XCB_EVENT_MASK_PROPERTY_CHANGE
-			| XCB_EVENT_MASK_COLOR_MAP_CHANGE
-			| XCB_EVENT_MASK_OWNER_GRAB_BUTTON,
+			//1,
+			//mask,
 			colormap
 		});
 
@@ -398,6 +382,31 @@ xcbtools_window_current(xcb_connection_t *conn)
 	free(reply);
 
 	return win;
+}
+
+xcb_atom_t
+xcbtools_atom(xcb_connection_t *conn, char *atom_name)
+{
+  xcb_intern_atom_cookie_t cookie;
+  xcb_intern_atom_reply_t *reply;
+  xcb_atom_t atom;
+
+  if (atom_name == NULL) {
+    return XCB_NONE;
+  }
+
+  cookie = xcb_intern_atom(conn, 0, strlen(atom_name), atom_name);
+  reply = xcb_intern_atom_reply(conn, cookie, NULL);
+
+  if (!reply) {
+    return XCB_NONE;
+  }
+
+  free(reply);
+
+  atom = reply->atom;
+
+  return atom;
 }
 
 void
@@ -498,7 +507,7 @@ xcbtools_event_loop(xcb_connection_t *conn, char *event_dir)
 
 				break;
 			case XCB_KEYMAP_NOTIFY:
-				xcbtools_event_trigger(conn, ((xcb_button_release_event_t*)event)->event, "mouse-up", event_dir);
+				xcbtools_event_trigger(conn, ((xcb_button_release_event_t*)event)->event, "keymap-notify", event_dir);
 
 				break;
 			case XCB_EXPOSE:
@@ -584,11 +593,11 @@ xcbtools_event_loop(xcb_connection_t *conn, char *event_dir)
 
 				break;
 			case XCB_SELECTION_REQUEST:
-				xcbtools_event_trigger(conn, ((xcb_selection_request_event_t*)event)->owner, "select-begin", event_dir);
+				xcbtools_event_trigger(conn, ((xcb_selection_request_event_t*)event)->owner, "select-start", event_dir);
 
 				break;
 			case XCB_SELECTION_NOTIFY:
-				xcbtools_event_trigger(conn, ((xcb_selection_notify_event_t*)event)->requestor, "select-finish", event_dir);
+				xcbtools_event_trigger(conn, ((xcb_selection_notify_event_t*)event)->requestor, "select-end", event_dir);
 
 				break;
 			case XCB_COLORMAP_NOTIFY:
@@ -617,7 +626,7 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 	char *event_path = (char *) malloc(1 + strlen(event_name) + strlen(event_dir? event_dir : "~/.events"));
 	char *event_cmd;
 	DIR *dir;
-	struct dirent prev;
+	//struct dirent prev;
 	struct dirent *entry;
 
 	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", event_name);
@@ -640,7 +649,7 @@ xcbtools_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_nam
 		return false;
 	}
 
-	while (readdir_r(dir, &prev, &entry) == 0 && entry) {
+	while ((entry = readdir(dir)) != NULL) {
 		if (
 			(strcmp(entry->d_name, ".") == 0) ||
 			(strcmp(entry->d_name, "..") == 0)
@@ -672,7 +681,7 @@ xcbtools_event_environment(xcb_window_t win)
 	env[0] = (char *) malloc(32);
 
 	if (win) {
-		sprintf(env[0], "WINDOW=%08x", win);
+		sprintf(env[0], "WINDOW=0x%08x", win);
 	} else {
 		sprintf(env[0], "WINDOW=");
 	}
@@ -723,6 +732,7 @@ xcbtools_event_spawn(xcb_window_t win, char *cmd_path, bool spawn)
 		NULL
 	};
 	int fd;
+
 
 	switch (pid = spawn? fork() : 0) {
 		case -1:
@@ -785,7 +795,7 @@ void
 xcbtools_usage_header(char *name)
 {
 	fprintf(stderr, "[%s] - %s Version %s\n", name, XCBTOOLS_SUITE, XCBTOOLS_VERSION);
-	fprintf(stderr, "Copyright %s\n", XCBTOOLS_COPYRIGHT);
+	fprintf(stderr, "Copyright (c) %s\n", XCBTOOLS_COPYRIGHT);
 	fprintf(stderr, "%s\n\n", XCBTOOLS_LICENSE);
 }
 

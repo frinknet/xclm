@@ -1,28 +1,15 @@
-/* See LICENSE file for copyright and license details. */
+/* SEE LICENSE */
 
-#include "xcbtools.h"
+#include "xcmd.h"
 
-static xcb_connection_t *conn;
+xcmd_call (2, "wid") {
+	xcmd_win_loop {
+		if (!xcbtools_window_exists(xcmd_conn, xcmd_win)) {
+			xcmd_return(1);
+		}
 
-int
-main(int argc, char **argv)
-{
-	xcb_window_t win = 0;
-
-	if (argc < 2) {
-		xcbtools_usage_window(argv[0], "");
+		xcb_set_input_focus(xcmd_conn, XCB_INPUT_FOCUS_POINTER_ROOT, xcmd_win, XCB_CURRENT_TIME);
 	}
 
-	xcbtools_conn_init(&conn);
-
-	win = strtoul(argv[1], NULL, 16);
-
-	if (xcbtools_window_exists(conn, win)) {
-		xcb_set_input_focus(conn, XCB_INPUT_FOCUS_POINTER_ROOT, win,
-				XCB_CURRENT_TIME);
-	}
-
-	xcbtools_conn_kill(&conn);
-
-	return 0;
+	xcmd_exit(0);
 }

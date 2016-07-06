@@ -1,31 +1,15 @@
-/* See LICENSE file for copyright and license details. */
+/* SEE LICENSE */
 
-#include "xcbtools.h"
+#include "xcmd.h"
 
-static xcb_connection_t *conn;
-
-int
-main(int argc, char **argv)
-{
-	xcb_window_t win = 0;
-
-	if (argc < 2) {
-		xcbtools_usage_window(argv[0], "");
-	}
-
-	xcbtools_conn_init(&conn);
-
-	while (*++argv) {
-		win = strtoul(*argv, NULL, 16);
-
-		if (xcbtools_window_mapped(conn, win)) {
-			xcb_unmap_window(conn, win);
+xcmd_simple {
+	xcmd_win_loop {
+		if (xcbtools_window_mapped(xcmd_conn, xcmd_win)) {
+			xcb_unmap_window(xcmd_conn, xcmd_win);
 		} else {
-			xcb_map_window(conn, win);
+			xcb_map_window(xcmd_conn, xcmd_win);
 		}
 	}
 
-	xcbtools_conn_kill(&conn);
-
-	return 0;
+	xcmd_exit(0);
 }

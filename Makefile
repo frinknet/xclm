@@ -10,12 +10,13 @@ SRC = \
 	window-create.c \
 	window-focus.c \
 	window-kill.c \
-	window-move-by.c \
-	window-move-to.c \
-	window-warp-by.c \
-	window-warp-to.c \
-	window-resize-by.c \
-	window-resize-to.c \
+	window-nudge.c \
+	window-move.c \
+	window-morph.c \
+	window-warp.c \
+	window-grow.c \
+	window-shrink.c \
+	window-resize.c \
 	window-show.c \
 	window-hide.c \
 	window-toggle.c \
@@ -33,7 +34,7 @@ SRC = \
 	window-get-class.c \
 	window-get-name.c \
 	window-get-parent.c \
-	window-get-root.c \
+	window-get-atom.c \
 	window-list-ignored.c \
 	window-list-managed.c \
 	window-list-visible.c \

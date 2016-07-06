@@ -51,19 +51,26 @@ returns 1 on error otherwise 0
 List by Status
 --------------
 
-	list-verbed-nouns
+	noun-list-verbed
 
 prints ids of the nouns affected
 returns 1 on error otherwise 0
+
+List by Association
+-------------------
+
+	noun-list-by-noun
+
+prints ids of the nouns associated
+returns 1 on error otherwise 0
+
 
 
 Testing Status
 --------------
 
-	is-noun-verbed ids
+	noun-is-verbed ids
 
 prints nothing
 returns 1 or 0 depending on check
-
-
 

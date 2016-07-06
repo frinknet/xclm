@@ -37,6 +37,6 @@ Plan
    from a specified directory
  - XCB Hotkeys: watches a hotkey directory for scripts with specifict hotkey names
  - XCB Panel: generic panel sdrawing utility for scripted UI
- - XCB Decorator: scriptable compositing (if possible)
- - XCB Framer: some layout primitives to facilitate tiling, tabbing, scroll frames,
+ - XCB Decorate: scriptable compositing (if possible)
+ - XCB Framing: some layout primitives to facilitate tiling, tabbing, scroll frames,
    accordions and other more complex interactions

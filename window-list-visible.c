@@ -1,52 +1,21 @@
-/* See LICENSE file for copyright and license details. */
+/* SEE LICENSE */
 
-#include "xcbtools.h"
+#include "xcmd.h"
 
-static xcb_connection_t *conn;
-
-void print_children(xcb_window_t);
-void print_if_visible(xcb_window_t);
-
-void
-print_children(xcb_window_t root)
-{
+xcmd_simple {
 	xcb_window_t *win;
 
-	xcbtools_window_children(conn, root, &win);
+	xcmd_win_loop {
+		xcbtools_window_children(xcmd_conn, xcmd_win, &win);
 
-	while (*win++) {
-		print_if_visible(*win);
+		while (*win++) {
+			if (xcbtools_window_mapped(xcmd_conn, *win) && !xcbtools_window_ignored(xcmd_conn, *win)) {
+				printf("0x%08x ", *win);
+			}
+		}
+
+		printf("\n");
 	}
 
-	printf("%s", "\n");
-}
-
-void
-print_if_visible(xcb_window_t win)
-{
-	if (xcbtools_window_mapped(conn, win) && !xcbtools_window_ignored(conn, win)) {
-		printf("0x%08x ", win);
-	}
-}
-
-int
-main(int argc, char **argv)
-{
-	xcb_window_t win;
-
-	if (argc < 2) {
-		xcbtools_usage_window(argv[0], "");
-	}
-
-	xcbtools_conn_init(&conn);
-
-	while (*++argv) {
-		win = strtoul(*argv, NULL, 16);
-
-		print_children(win);
-	}
-
-	xcbtools_conn_kill(&conn);
-
-	return 0;
+	xcmd_exit(0);
 }

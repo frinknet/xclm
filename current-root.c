@@ -1,19 +1,13 @@
-/* See LICENSE file for copyright and license details. */
+/* SEE LICENSE */
 
-#include "xcbtools.h"
+#include "xcmd.h"
 
-static xcb_connection_t *conn;
-static xcb_screen_t *screen;
+xcmd_call (1, "") {
+	xcb_screen_t *screen;
 
-int
-main(int argc, char **argv)
-{
-	xcbtools_conn_init(&conn);
-	xcbtools_screen_init(conn, &screen);
+	xcbtools_screen_init(xcmd_conn, &screen);
 
 	printf("0x%08x\n", screen->root);
 
-	xcbtools_conn_kill(&conn);
-
-	return 0;
+	xcmd_exit(0);
 }

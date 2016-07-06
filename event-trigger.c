@@ -1,37 +1,17 @@
-/* See LICENSE file for copyright and license details. */
+/* SEE LICENSE */
 
-#include "xcbtools.h"
+#include "xcmd.h"
 
-static xcb_connection_t *conn;
-
-int
-main(int argc, char **argv)
-{
-	xcb_window_t win = 0;
+xcmd_windows (2, "event-name") {
 	char *event_dir = getenv("EVENTS");
 	char *event_name;
 
-	if (argc < 2) {
-		xcbtools_usage(argv[0], "event-name [..wid]");
+	event_name = xcmd_next;
+
+	if (xcmd_args < 3) {
+		xcbtools_event_trigger(xcmd_conn, 0, event_name, event_dir? event_dir : "~/.events");
+		xcmd_return(0);
 	}
 
-	event_name = *++argv;
-
-	xcbtools_conn_init(&conn);
-
-	if (argc < 3) {
-		xcbtools_event_trigger(conn, 0, event_name, event_dir? event_dir : "~/.events");
-
-		return 0;
-	}
-
-	while (*++argv) {
-		win = strtoul(*argv, NULL, 16);
-
-		xcbtools_event_trigger(conn, win, event_name, event_dir? event_dir : "~/.events");
-	}
-
-	xcbtools_conn_kill(&conn);
-
-	return 0;
+	xcmd_win_exec(xcbtools_event_trigger(xcmd_conn, xcmd_win, event_name, event_dir? event_dir : "~/.events"));
 }
