@@ -7,8 +7,8 @@ xcmd_call (2, "event-dir") {
 	xcb_window_t *win;
 	xcb_screen_t *screen;
 	uint32_t mask = XCB_EVENT_MASK_NO_EVENT
-		| XCB_EVENT_MASK_KEY_PRESS
-		| XCB_EVENT_MASK_KEY_RELEASE
+		//| XCB_EVENT_MASK_KEY_PRESS
+		//| XCB_EVENT_MASK_KEY_RELEASE
 		| XCB_EVENT_MASK_BUTTON_PRESS
 		| XCB_EVENT_MASK_BUTTON_RELEASE
 		| XCB_EVENT_MASK_ENTER_WINDOW
@@ -21,7 +21,7 @@ xcmd_call (2, "event-dir") {
 		| XCB_EVENT_MASK_BUTTON_4_MOTION
 		| XCB_EVENT_MASK_BUTTON_5_MOTION
 		| XCB_EVENT_MASK_BUTTON_MOTION
-		| XCB_EVENT_MASK_KEYMAP_STATE
+		//| XCB_EVENT_MASK_KEYMAP_STATE
 		| XCB_EVENT_MASK_EXPOSURE
 		| XCB_EVENT_MASK_VISIBILITY_CHANGE
 		| XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -33,18 +33,18 @@ xcmd_call (2, "event-dir") {
 		| XCB_EVENT_MASK_COLOR_MAP_CHANGE
 		| XCB_EVENT_MASK_OWNER_GRAB_BUTTON;
 
-	xcbtools_screen_init(xcmd_conn, &screen);
+	xmpl_screen_init(xcmd_conn, &screen);
 
 	event_dir = xcmd_next;
 
-	xcbtools_event_register(xcmd_conn, screen->root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
-	xcbtools_window_children(xcmd_conn, screen->root, &win);
+	xmpl_event_register(xcmd_conn, screen->root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
+	xmpl_window_children(xcmd_conn, screen->root, &win);
 
 	while (*win++) {
-		xcbtools_event_register(xcmd_conn, *win, mask);
+		xmpl_event_register(xcmd_conn, *win, mask);
 	}
 
-	xcbtools_event_loop(xcmd_conn, event_dir);
+	xmpl_event_loop(xcmd_conn, event_dir);
 
 	xcmd_exit(0);
 }

@@ -8,9 +8,9 @@ xcmd_windows (4, "width height") {
 	xcb_get_geometry_reply_t *geom;
 
 	xcmd_win_loop {
-		geom = xcbtools_window_geometry(xcmd_conn, xcmd_win);
+		geom = xmpl_window_geometry(xcmd_conn, xcmd_win);
 
-		xcbtools_window_resize(
+		xmpl_window_resize(
 			xcmd_conn,
 			xcmd_win,
 			(geom->width + width) * -1,

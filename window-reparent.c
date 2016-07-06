@@ -9,7 +9,7 @@ xcmd_windows (5, "parent x y") {
 	xcb_void_cookie_t cookie;
 	xcb_generic_error_t *error;
 
-	if (!xcbtools_window_exists(xcmd_conn, parent)) {
+	if (!xmpl_window_exists(xcmd_conn, parent)) {
 		printf("0x%08x parent window does not exist\n", parent);
 
 		xcmd_return(1);

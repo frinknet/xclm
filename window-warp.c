@@ -14,7 +14,7 @@ xcmd_windows (6, "x y width height") {
 	xcmd_loop {
 		win = strtoul(xcmd_prop, NULL, 16);
 
-		xcbtools_window_warp(xcmd_conn, win, x, y, width, height);
+		xmpl_window_warp(xcmd_conn, win, x, y, width, height);
 	}
 
 	xcmd_exit(0);

@@ -9,9 +9,9 @@ xcmd_windows (2, "event-name") {
 	event_name = xcmd_next;
 
 	if (xcmd_args < 3) {
-		xcbtools_event_trigger(xcmd_conn, 0, event_name, event_dir? event_dir : "~/.events");
+		xmpl_event_trigger(xcmd_conn, 0, event_name, event_dir? event_dir : "~/.events");
 		xcmd_return(0);
 	}
 
-	xcmd_win_exec(xcbtools_event_trigger(xcmd_conn, xcmd_win, event_name, event_dir? event_dir : "~/.events"));
+	xcmd_win_exec(xmpl_event_trigger(xcmd_conn, xcmd_win, event_name, event_dir? event_dir : "~/.events"));
 }

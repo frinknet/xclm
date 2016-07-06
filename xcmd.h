@@ -1,11 +1,12 @@
-// Directives to simplify xcbtools commands
+// X Command Management Directives to simplify xmpl commands
 
-#include "xcbtools.h"
+#include "xmpl.h"
+#include "xclm.h"
 
-#define xcmd_call(expects, description) static xcb_connection_t *xcmd_conn;int main(int argc, char **argv){if(argc < expects){xcbtools_usage(argv[0], description);}xcbtools_conn_init(&xcmd_conn);
-#define xcmd_windows(expects, description) static xcb_connection_t *xcmd_conn; int main(int argc, char **argv){if(argc < expects){xcbtools_usage_window(argv[0], description);}xcbtools_conn_init(&xcmd_conn);
+#define xcmd_call(expects, description) static xcb_connection_t *xcmd_conn;int main(int argc, char **argv){if(argc < expects){xclm_usage(argv[0], description);}xmpl_conn_init(&xcmd_conn);
+#define xcmd_windows(expects, description) static xcb_connection_t *xcmd_conn; int main(int argc, char **argv){if(argc < expects){xclm_usage_window(argv[0], description);}xmpl_conn_init(&xcmd_conn);
 #define xcmd_simple xcmd_windows(2, "")
-#define xcmd_return(r) xcbtools_conn_kill(&xcmd_conn);return r
+#define xcmd_return(r) xmpl_conn_kill(&xcmd_conn);return r
 #define xcmd_exit(r) xcmd_return(r);}
 #define xcmd_args argc
 #define xcmd_prop *argv
@@ -28,7 +29,7 @@ xcmd_windows (2, "") {
 	xcmd_loop {
 		win = strtoul(xcmd_prop, NULL, 16);
 	
-		printf("%s\n", xcbtools_window_name(xcmd_conn, win));
+		printf("%s\n", xmpl_window_name(xcmd_conn, win));
 	}
 
 	xcmd_exit(0);
@@ -37,8 +38,7 @@ xcmd_windows (2, "") {
 
 /** Call with Window IDs
 xcmd_simple {
-	xcmd_win_exec(printf("%s\n", xcbtools_window_name(xcmd_conn, xcmd_win)));
+	xcmd_win_exec(printf("%s\n", xmpl_window_name(xcmd_conn, xcmd_win)));
 }
 */
-
 

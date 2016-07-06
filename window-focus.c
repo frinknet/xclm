@@ -4,7 +4,7 @@
 
 xcmd_call (2, "wid") {
 	xcmd_win_loop {
-		if (!xcbtools_window_exists(xcmd_conn, xcmd_win)) {
+		if (!xmpl_window_exists(xcmd_conn, xcmd_win)) {
 			xcmd_return(1);
 		}
 
