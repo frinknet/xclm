@@ -2,12 +2,16 @@ include config.mk
 
 HDR = xmpl.h xcmd.h xclm.h
 SRC = \
-	current-root.c \
-	current-window.c \
 	event-watch.c \
 	event-trigger.c \
 	event-test.c \
-	window-create.c \
+	window-new.c \
+	window-get.c \
+	window-set.c \
+	window-command.c \
+	window-class.c \
+	window-name.c \
+	window-rename.c \
 	window-focus.c \
 	window-kill.c \
 	window-nudge.c \
@@ -30,11 +34,7 @@ SRC = \
 	window-size.c \
 	window-position.c \
 	window-geometry.c \
-	window-command.c \
-	window-class.c \
-	window-name.c \
 	window-parent.c \
-	window-get.c \
 	window-list-ignored.c \
 	window-list-managed.c \
 	window-list-visible.c \
@@ -47,7 +47,9 @@ SRC = \
 	window-is-visible.c \
 	window-is-class.c \
 	window-is-command.c \
-	window-is-valid.c
+	window-is-valid.c \
+	window-root.c \
+	window-current.c
 
 OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)

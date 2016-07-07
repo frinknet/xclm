@@ -45,8 +45,10 @@ xcb_window_t xmpl_window_parent(xcb_connection_t *conn, xcb_window_t win);
 xcb_get_geometry_reply_t *xmpl_window_geometry(xcb_connection_t *conn, xcb_window_t win);
 xcb_get_window_attributes_reply_t *xmpl_window_attributes(xcb_connection_t *conn, xcb_window_t win);
 
-char *xmpl_window_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop);
-char *xmpl_window_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name);
+char *xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name);
+char *xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop);
+void xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, char *value);
+void xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, char *value);
 
 char *xmpl_window_name(xcb_connection_t *conn, xcb_window_t win);
 char *xmpl_window_class(xcb_connection_t *conn, xcb_window_t win);

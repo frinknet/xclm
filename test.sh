@@ -2,11 +2,11 @@
 
 export PATH="./:$PATH"
 
-export ROOT=$(current-root)
-export WINDOW=$(current-window)
-export NEW=$(window-create $ROOT 100 100 90 90 new-test)
-export RED=$(window-create $ROOT 150 150 500 500 red-test)
-export BLUE=$(window-create $ROOT 10 10 90 90 blue-test)
+export ROOT=$(window-root)
+export WINDOW=$(window-current)
+export NEW=$(window-new $ROOT 100 100 90 90 new-test)
+export RED=$(window-new $ROOT 150 150 500 500 red-test)
+export BLUE=$(window-new $ROOT 10 10 90 90 blue-test)
 
 window-background 990000 $RED
 window-background 000099 $BLUE

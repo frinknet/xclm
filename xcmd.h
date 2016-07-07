@@ -1,4 +1,4 @@
-// X Command Management Directives to simplify xmpl commands
+// X Command Module Definitions
 
 #include "xmpl.h"
 #include "xclm.h"

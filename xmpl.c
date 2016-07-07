@@ -54,11 +54,9 @@ xmpl_screen_init(xcb_connection_t *conn, xcb_screen_t **screen)
 void
 xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *colormap, xcb_visualid_t *visual)
 {
-	xcb_depth_iterator_t depth;
-
 	*colormap = xcb_generate_id(conn);
 	*visual = screen->root_visual;
-	depth = xcb_screen_allowed_depths_iterator(screen);
+	xcb_depth_iterator_t depth = xcb_screen_allowed_depths_iterator(screen);
 
 	while (depth.rem) {
 		xcb_visualtype_t *type = xcb_depth_visuals(depth.data);
@@ -78,35 +76,62 @@ xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *co
 xcb_get_window_attributes_reply_t *
 xmpl_window_attributes(xcb_connection_t *conn, xcb_window_t win)
 {
-	xcb_get_window_attributes_cookie_t cookie;
-	xcb_get_window_attributes_reply_t  *reply;
-
-	cookie = xcb_get_window_attributes(conn, win);
-	reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
+	xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, win);
+	xcb_get_window_attributes_reply_t  *reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
 
 	return reply;
 }
 
 char *
-xmpl_window_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name)
+xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name)
 {
-	xcb_atom_t atom;
+	xcb_atom_t atom = xmpl_atom(conn, atom_name);
 
-	atom = xmpl_atom(conn, atom_name);
+	return xmpl_window_get_property(conn, win, atom);
+}
 
-	return xmpl_window_property(conn, win, atom);
+void
+xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, char *value)
+{
+	xcb_atom_t atom = xmpl_atom(conn, atom_name);
+
+	xmpl_window_set_property(conn, win, atom, value);
 }
 
 char *
-xmpl_window_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
+xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
 {
-	xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, win, prop, XCB_GET_PROPERTY_TYPE_ANY, 0L, UINT_MAX);
+	xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, win, prop, XCB_ATOM_STRING, 0L, UINT_MAX);
 	xcb_get_property_reply_t *reply = xcb_get_property_reply(conn, cookie, NULL);
 	char *value = xcb_get_property_value(reply);
 
 	free(reply);
 
 	return value;
+}
+
+void
+xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, char *value)
+{
+	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, prop, XCB_ATOM_STRING, 8, strlen(value), value);
+}
+
+char *
+xmpl_window_name(xcb_connection_t *conn, xcb_window_t win)
+{
+	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_NAME);
+}
+
+char *
+xmpl_window_class(xcb_connection_t *conn, xcb_window_t win)
+{
+	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_CLASS);
+}
+
+char *
+xmpl_window_command(xcb_connection_t *conn, xcb_window_t win)
+{
+	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_COMMAND);
 }
 
 void
@@ -322,40 +347,16 @@ xmpl_window_create(
 		x, y, width, height, 0,
 		XCB_WINDOW_CLASS_INPUT_OUTPUT,
 		visual,
-			//XCB_CW_BACK_PIXEL |
 			XCB_CW_BORDER_PIXEL |
-			//XCB_CW_OVERRIDE_REDIRECT |
-			//XCB_CW_EVENT_MASK |
 			XCB_CW_COLORMAP,
 		(unsigned int[]) {
-			//0,
 			0,
-			//1,
-			//mask,
 			colormap
 		});
 
 	xcb_flush(conn);
 
 	return win;
-}
-
-char *
-xmpl_window_name(xcb_connection_t *conn, xcb_window_t win)
-{
-	return xmpl_window_property(conn, win, XCB_ATOM_WM_NAME);
-}
-
-char *
-xmpl_window_class(xcb_connection_t *conn, xcb_window_t win)
-{
-	return xmpl_window_property(conn, win, XCB_ATOM_WM_CLASS);
-}
-
-char *
-xmpl_window_command(xcb_connection_t *conn, xcb_window_t win)
-{
-	return xmpl_window_property(conn, win, XCB_ATOM_WM_COMMAND);
 }
 
 xcb_window_t
