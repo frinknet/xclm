@@ -1,6 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=Elegacy Desktop
-Comment=Launch Elegacy Desktop
-Exec=/usr/share/xcbtools/elegacy-session
-Type=XSession

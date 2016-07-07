@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Environment and autostart:
+sourceprofile=(
+	"/etc/profile"
+	"${HOME}/.profile"
+)
+
+# Build Environment
+for file in "${sourceprofile[@]}"; do
+	[ -r "${file}" ] && . "${file}"
+done
+
+# Xclm! Environment
+export XCLMHOME="${XDG_CONFIG_HOME:-"$HOME/.config"}/xclm"
+export XCLMTOOLS="/usr/share/xclm"
+export COMMANDS="$XCLMTOOLS:$XCLMHOME/commands"
+export EVENTS="$XCLMHOME/events"
+export PATH="$PATH:$COMMANDS"
+
+# Build default events
+if [ ! -d "$EVENTS" ]; then
+	mkdir -p "$XCLMHOME/commands"
+	cp -r "$XCLMTOOLS/events" "$XCLMHOME"
+fi
+
+# Trap everything started signalled when this script exits or dies.
+cleanexit() {
+	event-trigger session-end
+
+	for child in $(jobs -p); do
+		jobs -p | grep -q $child && kill $child
+	done
+}
+
+trap cleanexit EXIT SIGHUP SIGINT SIGTERM
+
+
+# Start daemon
+mkfifo "$XCLMHOME/fifo"
+event-trigger session-start
+event-watch "$EVENTS" > "$XCLMHOME/fifo"

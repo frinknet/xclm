@@ -1,0 +1,6 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=X Command Line Management
+Comment=Launch Xclm!
+Exec=/usr/share/xclm/Xsession
+Type=XSession
