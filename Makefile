@@ -48,6 +48,7 @@ SRC = \
 	window-is-visible.c \
 	window-is-class.c \
 	window-is-command.c \
+	window-is-type.c \
 	window-is-valid.c \
 	window-root.c \
 	window-current.c
