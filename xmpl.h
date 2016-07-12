@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <xcb/xcb.h>
-#include <xcb/xcb_icccm.h>
+//#include <xcb/xcb_icccm.h>
 
 void xmpl_daemonize(char *out, char *err);
 
