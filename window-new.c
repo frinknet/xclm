@@ -11,7 +11,7 @@ xcmd_windows (7, "parent x y width height class") {
 	char *class = xcmd_next;
 
 	xcb_window_t win = xmpl_window_create(xcmd_conn, parent, x, y, width, height);
-	xmpl_window_set_property(xcmd_conn, win, XCB_ATOM_WM_CLASS, class);
+	xmpl_window_set_property(xcmd_conn, win, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, class);
 
 	printf("0x%08x\n", win);
 

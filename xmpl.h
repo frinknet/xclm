@@ -46,18 +46,20 @@ xcb_window_t xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win);
 xcb_get_geometry_reply_t *xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win);
 xcb_get_window_attributes_reply_t *xmpl_window_get_attributes(xcb_connection_t *conn, xcb_window_t win);
 
-char *xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name);
-char *xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop);
-void xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, char *value);
-void xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, char *value);
+void *xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, xcb_atom_t type);
+void *xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, xcb_atom_t type);
+void xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, xcb_atom_t type, void *value);
+void xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, xcb_atom_t type, void *value);
 
 char *xmpl_window_get_name(xcb_connection_t *conn, xcb_window_t win);
 char *xmpl_window_get_class(xcb_connection_t *conn, xcb_window_t win);
 char *xmpl_window_get_command(xcb_connection_t *conn, xcb_window_t win);
+char *xmpl_window_get_type(xcb_connection_t *conn, xcb_window_t win);
 
 xcb_window_t xmpl_window_get_current(xcb_connection_t *conn);
 
 xcb_atom_t xmpl_atom(xcb_connection_t *conn, char *atom_name);
+char *xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom_name);
 
 void xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask);
 bool xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t* event);

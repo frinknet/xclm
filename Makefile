@@ -35,6 +35,7 @@ SRC = \
 	window-position.c \
 	window-geometry.c \
 	window-parent.c \
+	window-type.c \
 	window-list-ignored.c \
 	window-list-managed.c \
 	window-list-visible.c \

@@ -82,34 +82,34 @@ xmpl_window_get_attributes(xcb_connection_t *conn, xcb_window_t win)
 	return reply;
 }
 
-char *
-xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name)
+void *
+xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, xcb_atom_t type)
 {
 	xcb_atom_t atom;
 
 	atom = xmpl_atom(conn, atom_name);
 
-	return xmpl_window_get_property(conn, win, atom);
+	return xmpl_window_get_property(conn, win, atom, type);
 }
 
 void
-xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, char *value)
+xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, xcb_atom_t type, void *value)
 {
 	xcb_atom_t atom;
 
 	atom = xmpl_atom(conn, atom_name);
 
-	xmpl_window_set_property(conn, win, atom, value);
+	xmpl_window_set_property(conn, win, atom, type, value);
 }
 
-char *
-xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
+void *
+xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, xcb_atom_t type)
 {
 	xcb_get_property_cookie_t cookie;
 	xcb_get_property_reply_t *reply;
-	char *value;
+	void *value;
 
-	cookie = xcb_get_property(conn, 0, win, prop, XCB_ATOM_STRING, 0L, UINT_MAX);
+	cookie = xcb_get_property(conn, 0, win, prop, type, 0L, UINT_MAX);
 	reply = xcb_get_property_reply(conn, cookie, NULL);
 	value = xcb_get_property_value(reply);
 
@@ -119,27 +119,37 @@ xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 }
 
 void
-xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, char *value)
+xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, xcb_atom_t type, void *value)
 {
-	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, prop, XCB_ATOM_STRING, 8, strlen(value), value);
+	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, prop, type, 8, strlen(value), value);
 }
 
 char *
 xmpl_window_get_name(xcb_connection_t *conn, xcb_window_t win)
 {
-	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_NAME);
+	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_NAME, XCB_ATOM_STRING);
 }
 
 char *
 xmpl_window_get_class(xcb_connection_t *conn, xcb_window_t win)
 {
-	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_CLASS);
+	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING);
 }
 
 char *
 xmpl_window_get_command(xcb_connection_t *conn, xcb_window_t win)
 {
-	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_COMMAND);
+	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_COMMAND, XCB_ATOM_STRING);
+}
+
+char *
+xmpl_window_get_type(xcb_connection_t *conn, xcb_window_t win)
+{
+	xcb_atom_t *atom;
+
+	atom = (xcb_atom_t *) xmpl_window_get_property(conn, win, xmpl_atom(conn, "_NET_WM_WINDOW_TYPE"), XCB_ATOM_ATOM);
+
+	return xmpl_atom_name(conn, *atom);
 }
 
 void
@@ -416,6 +426,32 @@ xmpl_atom(xcb_connection_t *conn, char *atom_name)
 
 	return atom;
 }
+
+char *
+xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
+{
+	xcb_get_atom_name_cookie_t cookie;
+	xcb_get_atom_name_reply_t *reply;
+	char *atom_name;
+
+	if (atom == XCB_NONE) {
+	  return "";
+	}
+
+	cookie = xcb_get_atom_name(conn, atom);
+	reply = xcb_get_atom_name_reply(conn, cookie, NULL);
+
+	if (!reply) {
+	  return "";
+	}
+
+	atom_name = xcb_get_atom_name_name(reply);
+
+	free(reply);
+
+	return atom_name;
+}
+
 
 void
 xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t type)
