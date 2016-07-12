@@ -10,9 +10,9 @@ xcmd_windows (6, "x y width height") {
 	xcb_get_geometry_reply_t *geom;
 
 	xcmd_win_loop {
-		geom = xmpl_window_geometry(xcmd_conn, xcmd_win);
+		geom = xmpl_window_get_geometry(xcmd_conn, xcmd_win);
 
-		xmpl_window_warp(
+		xmpl_window_set_geometry(
 			xcmd_conn,
 			xcmd_win,
 			geom->x + x,

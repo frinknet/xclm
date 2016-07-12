@@ -38,7 +38,7 @@ xcmd_call (2, "event-dir") {
 	event_dir = xcmd_next;
 
 	xmpl_event_register(xcmd_conn, screen->root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
-	xmpl_window_children(xcmd_conn, screen->root, &win);
+	xmpl_window_list_children(xcmd_conn, screen->root, &win);
 
 	while (*win++) {
 		xmpl_event_register(xcmd_conn, *win, mask);

@@ -74,7 +74,7 @@ xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *co
 }
 
 xcb_get_window_attributes_reply_t *
-xmpl_window_attributes(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_get_attributes(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_window_attributes_cookie_t cookie = xcb_get_window_attributes(conn, win);
 	xcb_get_window_attributes_reply_t  *reply = xcb_get_window_attributes_reply(conn, cookie, NULL);
@@ -85,7 +85,9 @@ xmpl_window_attributes(xcb_connection_t *conn, xcb_window_t win)
 char *
 xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name)
 {
-	xcb_atom_t atom = xmpl_atom(conn, atom_name);
+	xcb_atom_t atom;
+
+	atom = xmpl_atom(conn, atom_name);
 
 	return xmpl_window_get_property(conn, win, atom);
 }
@@ -93,7 +95,9 @@ xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name)
 void
 xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, char *value)
 {
-	xcb_atom_t atom = xmpl_atom(conn, atom_name);
+	xcb_atom_t atom;
+
+	atom = xmpl_atom(conn, atom_name);
 
 	xmpl_window_set_property(conn, win, atom, value);
 }
@@ -101,11 +105,15 @@ xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, 
 char *
 xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop)
 {
-	xcb_get_property_cookie_t cookie = xcb_get_property(conn, 0, win, prop, XCB_ATOM_STRING, 0L, UINT_MAX);
-	xcb_get_property_reply_t *reply = xcb_get_property_reply(conn, cookie, NULL);
-	char *value = xcb_get_property_value(reply);
+	xcb_get_property_cookie_t cookie;
+	xcb_get_property_reply_t *reply;
+	char *value;
 
-	free(reply);
+	cookie = xcb_get_property(conn, 0, win, prop, XCB_ATOM_STRING, 0L, UINT_MAX);
+	reply = xcb_get_property_reply(conn, cookie, NULL);
+	value = xcb_get_property_value(reply);
+
+	//free(reply);
 
 	return value;
 }
@@ -117,43 +125,43 @@ xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 }
 
 char *
-xmpl_window_name(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_get_name(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_NAME);
 }
 
 char *
-xmpl_window_class(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_get_class(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_CLASS);
 }
 
 char *
-xmpl_window_command(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_get_command(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_COMMAND);
 }
 
 void
-xmpl_window_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
+xmpl_window_set_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
 	xcb_change_window_attributes(conn, win, XCB_CW_OVERRIDE_REDIRECT, (uint32_t[]){ override });
 	xcb_flush(conn);
 }
 
 void
-xmpl_window_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color)
+xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color)
 {
 	xcb_change_window_attributes(conn, win, XCB_CW_BACK_PIXEL, (uint32_t[]){ color });
 
-	xcb_get_geometry_reply_t *geom = xmpl_window_geometry(conn, win);
+	xcb_get_geometry_reply_t *geom = xmpl_window_get_geometry(conn, win);
 	xcb_clear_area(conn, 1, win, 0, 0, geom->width, geom->height);
 
 	xcb_flush(conn);
 }
 
 void
-xmpl_window_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color)
+xmpl_window_set_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color)
 {
 	xcb_change_window_attributes(conn, win, XCB_CW_BORDER_PIXEL, (uint32_t[]){ color });
 	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_BORDER_WIDTH, (uint32_t[]){ size });
@@ -162,36 +170,38 @@ xmpl_window_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint
 }
 
 void
-xmpl_window_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
+xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
 {
 	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE, (uint32_t[]){ stack });
 	xcb_flush(conn);
 }
 
 void
-xmpl_window_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height)
+xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int width, int height)
 {
 	xcb_configure_window(
 		conn, win,
 		XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
 		(uint32_t[]){ width, height }
 	);
+
 	xcb_flush(conn);
 }
 
 void
-xmpl_window_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
+xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
 	xcb_configure_window(
 		conn, win,
 		XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
 		(uint32_t[]){ x, y }
 	);
+
 	xcb_flush(conn);
 }
 
 void
-xmpl_window_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
+xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
 {
 	xcb_configure_window(
 		conn, win,
@@ -201,11 +211,12 @@ xmpl_window_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int wid
 			XCB_CONFIG_WINDOW_HEIGHT,
 		(uint32_t[]){ x, y, width, height }
 	);
+
 	xcb_flush(conn);
 }
 
 xcb_get_geometry_reply_t *
-xmpl_window_geometry(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_geometry_cookie_t cookie;
 	xcb_get_geometry_reply_t *reply;
@@ -221,11 +232,11 @@ xmpl_window_geometry(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xmpl_window_exists(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_window_attributes_reply_t  *attr;
 
-	attr = xmpl_window_attributes(conn, win);
+	attr = xmpl_window_get_attributes(conn, win);
 
 	if (attr == NULL) {
 		return 0;
@@ -237,12 +248,12 @@ xmpl_window_exists(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xmpl_window_mapped(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_is_mapped(xcb_connection_t *conn, xcb_window_t win)
 {
 	int mapped;
 	xcb_get_window_attributes_reply_t  *attr;
 
-	attr = xmpl_window_attributes(conn, win);
+	attr = xmpl_window_get_attributes(conn, win);
 
 	if (attr == NULL) {
 		return 0;
@@ -256,12 +267,12 @@ xmpl_window_mapped(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xmpl_window_ignored(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win)
 {
 	int override;
 	xcb_get_window_attributes_reply_t *attr;
 
-	attr = xmpl_window_attributes(conn, win);
+	attr = xmpl_window_get_attributes(conn, win);
 
 	if (attr == NULL) {
 		return 0;
@@ -275,7 +286,7 @@ xmpl_window_ignored(xcb_connection_t *conn, xcb_window_t win)
 }
 
 int
-xmpl_window_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
+xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 {
 	uint32_t childnum = 0;
 	xcb_query_tree_cookie_t cookie;
@@ -301,7 +312,7 @@ xmpl_window_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **li
 }
 
 xcb_window_t
-xmpl_window_parent(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_window_t parent;
 	xcb_query_tree_cookie_t cookie;
@@ -360,7 +371,7 @@ xmpl_window_create(
 }
 
 xcb_window_t
-xmpl_window_current(xcb_connection_t *conn)
+xmpl_window_get_current(xcb_connection_t *conn)
 {
 	xcb_window_t win = 0;
 
@@ -384,26 +395,26 @@ xmpl_window_current(xcb_connection_t *conn)
 xcb_atom_t
 xmpl_atom(xcb_connection_t *conn, char *atom_name)
 {
-  xcb_intern_atom_cookie_t cookie;
-  xcb_intern_atom_reply_t *reply;
-  xcb_atom_t atom;
+	xcb_intern_atom_cookie_t cookie;
+	xcb_intern_atom_reply_t *reply;
+	xcb_atom_t atom;
 
-  if (atom_name == NULL) {
-    return XCB_NONE;
-  }
+	if (atom_name == NULL) {
+	  return XCB_NONE;
+	}
 
-  cookie = xcb_intern_atom(conn, 0, strlen(atom_name), atom_name);
-  reply = xcb_intern_atom_reply(conn, cookie, NULL);
+	cookie = xcb_intern_atom(conn, 0, strlen(atom_name), atom_name);
+	reply = xcb_intern_atom_reply(conn, cookie, NULL);
 
-  if (!reply) {
-    return XCB_NONE;
-  }
+	if (!reply) {
+	  return XCB_NONE;
+	}
 
-  free(reply);
+	atom = reply->atom;
 
-  atom = reply->atom;
+	free(reply);
 
-  return atom;
+	return atom;
 }
 
 void
@@ -630,7 +641,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, c
 
 	if (!win) {
 		printf("event-trigger %s\n", event_name);
-	} else if (!xmpl_window_ignored(conn, win)) {
+	} else if (!xmpl_window_is_ignored(conn, win)) {
 		printf("event-trigger %s 0x%08x\n", event_name, win);
 	} else {
 		return false;
@@ -771,7 +782,7 @@ xmpl_mouse_center_window(xcb_connection_t conn, xcb_window_t win)
 	uint32_t values[1];
 	xcb_get_geometry_reply_t *geom;
 
-	geom = xmpl_window_geometry(conn, win);
+	geom = xmpl_window_get_geometry(conn, win);
 
 	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0,
 			(geom->width  + (geom->border_width * 2)) / 2,

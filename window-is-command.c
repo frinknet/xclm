@@ -6,7 +6,7 @@ xcmd_windows (3, "command") {
 	char *class = xcmd_next;
 
 	xcmd_win_loop {
-		if (strcmp(class, xmpl_window_command(xcmd_conn, xcmd_win))) {
+		if (strcmp(class, xmpl_window_get_command(xcmd_conn, xcmd_win))) {
 			xcmd_return(1);
 		}
 	}

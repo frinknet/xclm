@@ -25,36 +25,37 @@ void xmpl_conn_kill(xcb_connection_t **conn);
 void xmpl_screen_init(xcb_connection_t *conn, xcb_screen_t **screen);
 void xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *colormap, xcb_visualid_t *visual);
 
-void xmpl_window_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color);
-void xmpl_window_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color);
+void xmpl_window_set_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color);
+void xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color);
 
-void xmpl_window_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack);
-void xmpl_window_ignore(xcb_connection_t *conn, xcb_window_t win, int override);
-void xmpl_window_move(xcb_connection_t *conn, xcb_window_t win, int x, int y);
-void xmpl_window_resize(xcb_connection_t *conn, xcb_window_t win, int width, int height);
-void xmpl_window_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height);
+void xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack);
+void xmpl_window_set_ignore(xcb_connection_t *conn, xcb_window_t win, int override);
+void xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y);
+void xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int width, int height);
+void xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height);
 
-int xmpl_window_exists(xcb_connection_t *conn, xcb_window_t win);
-int xmpl_window_mapped(xcb_connection_t *conn, xcb_window_t win);
-int xmpl_window_ignored(xcb_connection_t *conn, xcb_window_t win);
-int xmpl_window_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list);
+int xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win);
+int xmpl_window_is_mapped(xcb_connection_t *conn, xcb_window_t win);
+int xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win);
+
+int xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list);
 
 xcb_window_t xmpl_window_create(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height);
-xcb_window_t xmpl_window_parent(xcb_connection_t *conn, xcb_window_t win);
+xcb_window_t xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win);
 
-xcb_get_geometry_reply_t *xmpl_window_geometry(xcb_connection_t *conn, xcb_window_t win);
-xcb_get_window_attributes_reply_t *xmpl_window_attributes(xcb_connection_t *conn, xcb_window_t win);
+xcb_get_geometry_reply_t *xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win);
+xcb_get_window_attributes_reply_t *xmpl_window_get_attributes(xcb_connection_t *conn, xcb_window_t win);
 
 char *xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name);
 char *xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop);
 void xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, char *value);
 void xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, char *value);
 
-char *xmpl_window_name(xcb_connection_t *conn, xcb_window_t win);
-char *xmpl_window_class(xcb_connection_t *conn, xcb_window_t win);
-char *xmpl_window_command(xcb_connection_t *conn, xcb_window_t win);
+char *xmpl_window_get_name(xcb_connection_t *conn, xcb_window_t win);
+char *xmpl_window_get_class(xcb_connection_t *conn, xcb_window_t win);
+char *xmpl_window_get_command(xcb_connection_t *conn, xcb_window_t win);
 
-xcb_window_t xmpl_window_current(xcb_connection_t *conn);
+xcb_window_t xmpl_window_get_current(xcb_connection_t *conn);
 
 xcb_atom_t xmpl_atom(xcb_connection_t *conn, char *atom_name);
 
