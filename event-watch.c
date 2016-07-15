@@ -2,10 +2,9 @@
 
 #include "xcmd.h"
 
-xcmd_call (2, "event-dir") {
-	char *event_dir;
-	xcb_window_t *win;
-	xcb_screen_t *screen;
+xcmd_windows (3, "event-dir") {
+	xcb_window_t *child;
+
 	uint32_t mask = XCB_EVENT_MASK_NO_EVENT
 		//| XCB_EVENT_MASK_KEY_PRESS
 		//| XCB_EVENT_MASK_KEY_RELEASE
@@ -33,18 +32,19 @@ xcmd_call (2, "event-dir") {
 		| XCB_EVENT_MASK_COLOR_MAP_CHANGE
 		| XCB_EVENT_MASK_OWNER_GRAB_BUTTON;
 
-	xmpl_screen_init(xcmd_conn, &screen);
+	char *event_dir = xcmd_next;
 
-	event_dir = xcmd_next;
+	xcmd_win_loop {
+		xmpl_event_register(xcmd_conn, xcmd_win, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
 
-	xmpl_event_register(xcmd_conn, screen->root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY);
-	xmpl_window_list_children(xcmd_conn, screen->root, &win);
+		xmpl_window_list_children(xcmd_conn, xcmd_win, &child);
 
-	while (*win++) {
-		xmpl_event_register(xcmd_conn, *win, mask);
+		while (*child++) {
+			xmpl_event_register(xcmd_conn, *child, mask);
+		}
+
+		xmpl_event_loop(xcmd_conn, xcmd_win, event_dir);
 	}
-
-	xmpl_event_loop(xcmd_conn, event_dir);
 
 	xcmd_exit(0);
 }

@@ -21,6 +21,7 @@ void xmpl_daemonize(char *out, char *err);
 
 void xmpl_conn_init(xcb_connection_t **conn);
 void xmpl_conn_kill(xcb_connection_t **conn);
+void xmpl_conn_sync(xcb_connection_t *conn);
 
 void xmpl_screen_init(xcb_connection_t *conn, xcb_screen_t **screen);
 void xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *colormap, xcb_visualid_t *visual);
@@ -40,7 +41,7 @@ int xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win);
 
 int xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list);
 
-xcb_window_t xmpl_window_create(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height);
+xcb_window_t xmpl_window_create(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height, char *cls);
 xcb_window_t xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win);
 
 xcb_get_geometry_reply_t *xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win);
@@ -64,10 +65,9 @@ char *xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom_name);
 void xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask);
 bool xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t* event);
 bool xmpl_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event);
-void xmpl_event_loop(xcb_connection_t *conn, char *event_dir);
-bool xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, char *event_dir);
-char **xmpl_event_environment(xcb_window_t win);
-
-pid_t xmpl_event_spawn(xcb_window_t win, char *cmd_path, bool spawn);
+void xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir);
+bool xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, char *event_name, char *event_dir);
+pid_t xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn);
+char **xmpl_event_env(xcb_window_t root, xcb_window_t win);
 
 #endif
