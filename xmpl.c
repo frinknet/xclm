@@ -505,11 +505,15 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 
 	xmpl_conn_sync(conn);
 
-	/*
-	if (xcb_poll_for_event(conn) == NULL && !xmpl_fork("/dev/null", "/dev/null")) {
-		xmpl_event_loop(conn, win, event_path);
+	if (xcb_poll_for_event(conn) == NULL) {
+		return win;
 	}
-	*/
+
+	if (xmpl_fork("/dev/null", "/dev/null")) {
+		return win;
+	}
+
+	xmpl_event_loop(conn, win, event_path);
 
 	return win;
 }
