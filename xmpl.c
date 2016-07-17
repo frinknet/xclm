@@ -1,5 +1,8 @@
 #include "xmpl.h"
 
+/**
+ * Daemonize a Process
+ */
 void
 xmpl_daemonize(char *out, char *err)
 {
@@ -22,6 +25,9 @@ xmpl_daemonize(char *out, char *err)
 	}
 }
 
+/**
+ * Intialize the Connection
+ */
 void
 xmpl_conn_init(xcb_connection_t **conn)
 {
@@ -32,6 +38,9 @@ xmpl_conn_init(xcb_connection_t **conn)
 	}
 }
 
+/**
+ * Kill the Connection
+ */
 void
 xmpl_conn_kill(xcb_connection_t **conn)
 {
@@ -41,6 +50,20 @@ xmpl_conn_kill(xcb_connection_t **conn)
 	}
 }
 
+/**
+ * Sync the Connection
+ */
+void
+xmpl_conn_sync(xcb_connection_t *conn)
+{
+	xcb_flush(conn);
+
+	free(xcb_get_input_focus_reply(conn, xcb_get_input_focus(conn), NULL));
+}
+
+/**
+ * Initialize the Screen
+ */
 void
 xmpl_screen_init(xcb_connection_t *conn, xcb_screen_t **screen)
 {
@@ -51,6 +74,9 @@ xmpl_screen_init(xcb_connection_t *conn, xcb_screen_t **screen)
 	}
 }
 
+/**
+ * Initialize the Color
+ */
 void
 xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *colormap, xcb_visualid_t *visual)
 {
@@ -73,6 +99,9 @@ xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *co
 	xcb_create_colormap(conn, XCB_COLORMAP_ALLOC_NONE, *colormap, screen->root, *visual);
 }
 
+/**
+ * Get Attibrutes for Window
+ */
 xcb_get_window_attributes_reply_t *
 xmpl_window_get_attributes(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -82,6 +111,9 @@ xmpl_window_get_attributes(xcb_connection_t *conn, xcb_window_t win)
 	return reply;
 }
 
+/**
+ * Get Atom for Window
+ */
 void *
 xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, xcb_atom_t type)
 {
@@ -92,6 +124,9 @@ xmpl_window_get_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, 
 	return xmpl_window_get_property(conn, win, atom, type);
 }
 
+/**
+ * Set Atom for Window
+ */
 void
 xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, xcb_atom_t type, void *value)
 {
@@ -102,6 +137,9 @@ xmpl_window_set_atom(xcb_connection_t *conn, xcb_window_t win, char *atom_name, 
 	xmpl_window_set_property(conn, win, atom, type, value);
 }
 
+/**
+ * Get Property for Window
+ */
 void *
 xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, xcb_atom_t type)
 {
@@ -118,30 +156,45 @@ xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 	return value;
 }
 
+/**
+ * Set Property for Window
+ */
 void
 xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, xcb_atom_t type, void *value)
 {
 	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, prop, type, 8, strlen(value), value);
 }
 
+/**
+ * Get Name for Window
+ */
 char *
 xmpl_window_get_name(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_NAME, XCB_ATOM_STRING);
 }
 
+/**
+ * Get Class for Window
+ */
 char *
 xmpl_window_get_class(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING);
 }
 
+/**
+ * Get Command for Window
+ */
 char *
 xmpl_window_get_command(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_COMMAND, XCB_ATOM_STRING);
 }
 
+/**
+ * Get Type for Window
+ */
 char *
 xmpl_window_get_type(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -152,6 +205,9 @@ xmpl_window_get_type(xcb_connection_t *conn, xcb_window_t win)
 	return xmpl_atom_name(conn, *atom);
 }
 
+/**
+ * Set Ignore for Window
+ */
 void
 xmpl_window_set_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
@@ -159,6 +215,9 @@ xmpl_window_set_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 	xcb_flush(conn);
 }
 
+/**
+ * Set Background for Window
+ */
 void
 xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color)
 {
@@ -170,6 +229,9 @@ xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t co
 	xcb_flush(conn);
 }
 
+/**
+ * Set Border for Window
+ */
 void
 xmpl_window_set_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color)
 {
@@ -179,6 +241,9 @@ xmpl_window_set_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, 
 	xcb_flush(conn);
 }
 
+/**
+ * Set Stack for Window
+ */
 void
 xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
 {
@@ -186,6 +251,9 @@ xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
 	xcb_flush(conn);
 }
 
+/**
+ * Set Size for Window
+ */
 void
 xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int width, int height)
 {
@@ -198,6 +266,9 @@ xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int width, int he
 	xcb_flush(conn);
 }
 
+/**
+ * Set Position for Window
+ */
 void
 xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
@@ -210,6 +281,9 @@ xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 	xcb_flush(conn);
 }
 
+/**
+ * Set Geometry for Window
+ */
 void
 xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
 {
@@ -225,6 +299,9 @@ xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y,
 	xcb_flush(conn);
 }
 
+/**
+ * Get Geometry for Window
+ */
 xcb_get_geometry_reply_t *
 xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -241,6 +318,9 @@ xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win)
 	return reply;
 }
 
+/**
+ * Check that Window is Valid
+ */
 int
 xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -257,6 +337,9 @@ xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win)
 	return 1;
 }
 
+/**
+ * Check that Window is Mapped
+ */
 int
 xmpl_window_is_mapped(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -276,6 +359,9 @@ xmpl_window_is_mapped(xcb_connection_t *conn, xcb_window_t win)
 	return mapped == XCB_MAP_STATE_VIEWABLE;
 }
 
+/**
+ * Check that Window is Ignored
+ */
 int
 xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -295,6 +381,9 @@ xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win)
 	return override;
 }
 
+/**
+ * List Window Children
+ */
 int
 xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list)
 {
@@ -321,6 +410,9 @@ xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t
 	return childnum;
 }
 
+/**
+ * Get Window Parent
+ */
 xcb_window_t
 xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win)
 {
@@ -342,6 +434,9 @@ xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win)
 	return parent;
 }
 
+/**
+ * Create a new Window
+ */
 xcb_window_t
 xmpl_window_create(
 	xcb_connection_t *conn,
@@ -380,6 +475,9 @@ xmpl_window_create(
 	return win;
 }
 
+/**
+ * Get Current Window
+ */
 xcb_window_t
 xmpl_window_get_current(xcb_connection_t *conn)
 {
@@ -402,6 +500,9 @@ xmpl_window_get_current(xcb_connection_t *conn)
 	return win;
 }
 
+/**
+ * Get Atom based on Atom Name
+ */
 xcb_atom_t
 xmpl_atom(xcb_connection_t *conn, char *atom_name)
 {
@@ -427,6 +528,9 @@ xmpl_atom(xcb_connection_t *conn, char *atom_name)
 	return atom;
 }
 
+/**
+ * Get Atom Name based on Atom
+ */
 char *
 xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
 {
@@ -452,7 +556,9 @@ xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
 	return atom_name;
 }
 
-
+/**
+ * Register Events
+ */
 void
 xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t type)
 {
@@ -463,6 +569,9 @@ xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t type)
 	xcb_flush(conn);
 }
 
+/*
+ * Test Whether A Configure Event Should Happen
+ */
 bool
 xmpl_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 {
@@ -476,6 +585,9 @@ xmpl_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 	return (config->window == screen->root);
 }
 
+/*
+ * Test Whether A Notify Event Should Happen
+ */
 bool
 xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 {
@@ -494,6 +606,9 @@ xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 	return false;
 }
 
+/**
+ * Run an Event Loop
+ */
 void
 xmpl_event_loop(xcb_connection_t *conn, char *event_dir)
 {
@@ -663,6 +778,9 @@ xmpl_event_loop(xcb_connection_t *conn, char *event_dir)
 	}
 }
 
+/**
+ * Trigger an Event
+ */
 bool
 xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, char *event_dir)
 {
@@ -712,6 +830,9 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, c
 	return true;
 }
 
+/**
+ * Event Spawn
+ */
 pid_t
 xmpl_event_spawn(xcb_window_t win, char *cmd_path, bool spawn)
 {
@@ -757,6 +878,9 @@ xmpl_event_spawn(xcb_window_t win, char *cmd_path, bool spawn)
 	exit(1);
 }
 
+/**
+ * Event Environment
+ */
 char **
 xmpl_event_environment(xcb_window_t win)
 {
