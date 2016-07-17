@@ -438,14 +438,7 @@ xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win)
  * Create a new Window
  */
 xcb_window_t
-xmpl_window_create(
-	xcb_connection_t *conn,
-	xcb_window_t parent,
-	int x,
-	int y,
-	int width,
-	int height
-)
+xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, int width, int height, char *cls)
 {
 	xcb_window_t win = xcb_generate_id(conn);
 	xcb_screen_t *screen;
@@ -468,7 +461,10 @@ xmpl_window_create(
 		(unsigned int[]) {
 			0,
 			colormap
-		});
+		}
+	);
+
+	xmpl_window_set_property(conn, win, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, cls);
 
 	xcb_flush(conn);
 

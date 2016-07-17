@@ -40,7 +40,7 @@ int xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win);
 
 int xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list);
 
-xcb_window_t xmpl_window_create(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height);
+xcb_window_t xmpl_window_create(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height, char *cls);
 xcb_window_t xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win);
 
 xcb_get_geometry_reply_t *xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win);
