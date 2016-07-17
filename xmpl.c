@@ -501,7 +501,6 @@ xmpl_event_loop(xcb_connection_t *conn, char *event_dir)
 	char *event_name = (char *) malloc(32);
 	xcb_generic_event_t *event;
 
-
 	while (running) {
 		event = xcb_wait_for_event(conn);
 
@@ -713,59 +712,6 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t win, char *event_name, c
 	return true;
 }
 
-char **
-xmpl_event_environment(xcb_window_t win)
-{
-	char *events_dir = getenv("EVENTS");
-	char *path_dir = getenv("PATH");
-	char *cmd_dir = getenv("COMMANDS");
-	char *env[5];
-
-
-	env[0] = (char *) malloc(32);
-
-	if (win) {
-		sprintf(env[0], "WINDOW=0x%08x", win);
-	} else {
-		sprintf(env[0], "WINDOW=");
-	}
-
-	if (!events_dir) {
-		events_dir = (char *) malloc(10);
-		events_dir = "~/.events";
-	}
-
-	env[1] = (char *) malloc(8 + strlen(events_dir));
-
-	sprintf(env[1], "EVENTS=%s", events_dir);
-
-	if (!cmd_dir) {
-		cmd_dir = (char *) malloc(2);
-		cmd_dir = ".";
-	}
-
-	env[2] = (char *) malloc(10 + strlen(cmd_dir));
-
-	sprintf(env[2], "COMMANDS=%s", cmd_dir);
-
-	if (!path_dir) {
-		path_dir = (char *) malloc(2);
-		path_dir = ".";
-	}
-
-	env[3] = (char *) malloc(6 + strlen(cmd_dir) + strlen(path_dir));
-
-	sprintf(env[3], "PATH=%s:%s", path_dir, cmd_dir);
-
-	env[4] = NULL;
-
-	char **ret = malloc(sizeof(env));
-
-	memcpy(ret, env, sizeof(env));
-
-	return ret;
-}
-
 pid_t
 xmpl_event_spawn(xcb_window_t win, char *cmd_path, bool spawn)
 {
@@ -809,6 +755,58 @@ xmpl_event_spawn(xcb_window_t win, char *cmd_path, bool spawn)
 	fprintf(stderr, "failed exec: %s\n", cmd_path);
 
 	exit(1);
+}
+
+char **
+xmpl_event_environment(xcb_window_t win)
+{
+	char *events_dir = getenv("EVENTS");
+	char *path_dir = getenv("PATH");
+	char *cmd_dir = getenv("COMMANDS");
+	char *env[5];
+
+	env[0] = (char *) malloc(32);
+
+	if (win) {
+		sprintf(env[0], "WINDOW=0x%08x", win);
+	} else {
+		sprintf(env[0], "WINDOW=");
+	}
+
+	if (!events_dir) {
+		events_dir = (char *) malloc(10);
+		events_dir = "~/.events";
+	}
+
+	env[1] = (char *) malloc(8 + strlen(events_dir));
+
+	sprintf(env[1], "EVENTS=%s", events_dir);
+
+	if (!cmd_dir) {
+		cmd_dir = (char *) malloc(2);
+		cmd_dir = ".";
+	}
+
+	env[2] = (char *) malloc(10 + strlen(cmd_dir));
+
+	sprintf(env[2], "COMMANDS=%s", cmd_dir);
+
+	if (!path_dir) {
+		path_dir = (char *) malloc(2);
+		path_dir = ".";
+	}
+
+	env[3] = (char *) malloc(6 + strlen(cmd_dir) + strlen(path_dir));
+
+	sprintf(env[3], "PATH=%s:%s", path_dir, cmd_dir);
+
+	env[4] = NULL;
+
+	char **ret = malloc(sizeof(env));
+
+	memcpy(ret, env, sizeof(env));
+
+	return ret;
 }
 
 /*
