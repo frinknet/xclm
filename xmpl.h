@@ -17,7 +17,7 @@
 #include <xcb/xcb.h>
 //#include <xcb/xcb_icccm.h>
 
-int xmpl_daemonize(char *out, char *err);
+int xmpl_fork(char *out, char *err);
 
 void xmpl_conn_init(xcb_connection_t **conn);
 void xmpl_conn_kill(xcb_connection_t **conn);

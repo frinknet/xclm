@@ -14,7 +14,7 @@ xcmd_call (7, "parent x y width height class") {
 
 	printf("0x%08x\n", win);
 
-	if (xmpl_daemonize("/dev/null", "/dev/null")) {
+	if (xmpl_fork("/dev/null", "/dev/null")) {
 		exit(0);
 	}
 

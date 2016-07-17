@@ -4,7 +4,7 @@
  * Daemonize a Process
  */
 int
-xmpl_daemonize(char *out, char *err)
+xmpl_fork(char *out, char *err)
 {
 	int fout, ferr;
 
@@ -498,7 +498,7 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 	xmpl_conn_sync(conn);
 
 	/*
-	if (xcb_poll_for_event(conn) == NULL && !fork()) {
+	if (xcb_poll_for_event(conn) == NULL && !xmpl_fork("/dev/null", "/dev/null")) {
 		xmpl_event_loop(conn, win, event_path);
 	}
 	*/
