@@ -897,6 +897,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 	//struct dirent prev;
 	struct dirent *entry;
 
+	/*
 	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", event_name);
 
 	if (!win) {
@@ -906,6 +907,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 	} else {
 		return false;
 	}
+	*/
 
 	fflush(stdout);
 

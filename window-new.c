@@ -3,7 +3,7 @@
 #include "xcmd.h"
 
 xcmd_call (7, "parent x y width height class") {
-	xcb_window_t parent = strtoul(*++argv, NULL, 16);
+	xcb_window_t parent = strtoul(xcmd_next, NULL, 16);
 	int x = atoi(xcmd_next);
 	int y = atoi(xcmd_next);
 	int width = atoi(xcmd_next);
