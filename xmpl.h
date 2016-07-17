@@ -21,6 +21,7 @@ void xmpl_daemonize(char *out, char *err);
 
 void xmpl_conn_init(xcb_connection_t **conn);
 void xmpl_conn_kill(xcb_connection_t **conn);
+void xmpl_conn_sync(xcb_connection_t *conn);
 
 void xmpl_screen_init(xcb_connection_t *conn, xcb_screen_t **screen);
 void xmpl_color_init(xcb_connection_t *conn, xcb_screen_t *screen, xcb_colormap_t *colormap, xcb_visualid_t *visual);
@@ -66,7 +67,7 @@ bool xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t* event)
 bool xmpl_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event);
 void xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir);
 bool xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, char *event_name, char *event_dir);
-char **xmpl_event_env(xcb_window_t root, xcb_window_t win);
 pid_t xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn);
+char **xmpl_event_env(xcb_window_t root, xcb_window_t win);
 
 #endif

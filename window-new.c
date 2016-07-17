@@ -2,7 +2,7 @@
 
 #include "xcmd.h"
 
-xcmd_windows (7, "parent x y width height class") {
+xcmd_call (7, "parent x y width height class") {
 	xcb_window_t parent = strtoul(*++argv, NULL, 16);
 	int x = atoi(xcmd_next);
 	int y = atoi(xcmd_next);
