@@ -6,6 +6,7 @@
 int
 xmpl_fork(char *out, char *err)
 {
+	pid_t pid;
 	int fout, ferr;
 
 	fout = open(out, O_WRONLY);
@@ -20,7 +21,14 @@ xmpl_fork(char *out, char *err)
 	close(fout);
 	close(ferr);
 
-	return fork();
+	pid = fork();
+
+	if (pid == -1) {
+		fprintf(stderr, "failed to fork properly\n");
+		exit(1);
+	}
+
+	return pid;
 }
 
 /**
@@ -934,23 +942,8 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn
 		cmd_path,
 		NULL
 	};
-	int fd;
 
-
-	switch (pid = spawn? fork() : 0) {
-		case -1:
-			fprintf(stderr, "failed to fork properly\n");
-			exit(1);
-
-			break;
-		case 0:
-			fd = open("/dev/null", O_WRONLY);
-
-			dup2(fd, 1);
-			close(fd);
-
-			break;
-		default:
+	if ((pid = spawn? xmpl_fork("/dev/null", "/dev/null") : 0)) {
 			return pid;
 	}
 
