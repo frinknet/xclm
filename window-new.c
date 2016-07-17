@@ -14,7 +14,9 @@ xcmd_call (7, "parent x y width height class") {
 
 	printf("0x%08x\n", win);
 
-	xmpl_daemonize("/dev/null", "/dev/null");
+	if (xmpl_daemonize("/dev/null", "/dev/null")) {
+		exit(0);
+	}
 
 	// start listening for redraw
 	while (true) {

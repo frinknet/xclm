@@ -3,7 +3,7 @@
 /**
  * Daemonize a Process
  */
-void
+int
 xmpl_daemonize(char *out, char *err)
 {
 	int fout, ferr;
@@ -20,9 +20,7 @@ xmpl_daemonize(char *out, char *err)
 	close(fout);
 	close(ferr);
 
-	if (fork()) {
-		exit(0);
-	}
+	return fork();
 }
 
 /**
