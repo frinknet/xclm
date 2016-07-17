@@ -8,21 +8,18 @@ xcmd_call (7, "parent x y width height class") {
 	int y = atoi(xcmd_next);
 	int width = atoi(xcmd_next);
 	int height = atoi(xcmd_next);
-	char *class = xcmd_next;
+	char *cls = xcmd_next;
+	char *event_dir = getenv("EVENTS");
+	char *event_path = (char *) malloc(1 + strlen(cls) + strlen(event_dir? event_dir : "~/.events"));
 
-	xcb_window_t win = xmpl_window_create(xcmd_conn, parent, x, y, width, height, class);
+	xcb_window_t win = xmpl_window_create(xcmd_conn, parent, x, y, width, height, cls);
 
 	printf("0x%08x\n", win);
 
 	if (xmpl_fork("/dev/null", "/dev/null")) {
-		exit(0);
-	}
-
-	// start listening for redraw
-	while (true) {
-		//wait for event
-		sleep(0.1);
-		//force redraw
+		return 0;
+	} else {
+		xmpl_event_loop(xcmd_conn, win, event_path);
 	}
 
 	xcmd_exit(0);
