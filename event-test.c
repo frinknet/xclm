@@ -7,8 +7,7 @@ xcmd_windows (3, "event-dir") {
 	char *event_dir = xcmd_next;
 	xcb_generic_event_t *xevent;
 
-	const uint32_t select_input_val[] = {
-		XCB_EVENT_MASK_NO_EVENT
+	const uint32_t mask = XCB_EVENT_MASK_NO_EVENT
 		//
 		| XCB_EVENT_MASK_STRUCTURE_NOTIFY
 		| XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
@@ -32,17 +31,10 @@ xcmd_windows (3, "event-dir") {
 		//| XCB_EVENT_MASK_BUTTON_5_MOTION
 		//| XCB_EVENT_MASK_BUTTON_MOTION
 		//| XCB_EVENT_MASK_OWNER_GRAB_BUTTON
-	};
+		;
 
 	xcmd_win_loop {
-		xcb_change_window_attributes(
-			xcmd_conn,
-			xcmd_win,
-			XCB_CW_EVENT_MASK,
-			select_input_val
-		);
-
-		xmpl_conn_sync(xcmd_conn);
+		xmpl_event_register(xcmd_conn, xcmd_win, mask);
 
 		if (xcb_poll_for_event(xcmd_conn) != NULL) {
 			fprintf(stderr, "another window manager is running for 0x%08x\n", xcmd_win);

@@ -456,8 +456,7 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 	xcb_visualid_t visual;
 	char *event_dir = getenv("EVENTS");
 	char *event_path = (char *) malloc(1 + strlen(cls) + strlen(event_dir? event_dir : "~/.events"));
-	const uint32_t mask[] = {
-		XCB_EVENT_MASK_NO_EVENT
+	const uint32_t mask = XCB_EVENT_MASK_NO_EVENT
 		//
 		| XCB_EVENT_MASK_STRUCTURE_NOTIFY
 		| XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
@@ -481,7 +480,7 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 		//| XCB_EVENT_MASK_BUTTON_5_MOTION
 		//| XCB_EVENT_MASK_BUTTON_MOTION
 		//| XCB_EVENT_MASK_OWNER_GRAB_BUTTON
-	};
+		;
 
 	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", cls);
 
@@ -505,9 +504,7 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 	);
 
 	xmpl_window_set_property(conn, win, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, cls);
-	xcb_change_window_attributes(conn, win, XCB_CW_EVENT_MASK, mask);
-
-	xmpl_conn_sync(conn);
+	xmpl_event_register(conn, win, mask);
 
 	/*
 	if (xcb_poll_for_event(conn) != NULL) {
@@ -610,12 +607,9 @@ xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
  * Register Events
  */
 void
-xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t type)
+xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 {
-	uint32_t values[] = { type };
-	uint32_t mask = XCB_CW_EVENT_MASK;
-
-	xcb_change_window_attributes(conn, win, mask, values);
+	xcb_change_window_attributes(conn, win, XCB_CW_OVERRIDE_REDIRECT, (uint32_t[]){ mask });
 	xcb_flush(conn);
 }
 
