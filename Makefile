@@ -42,6 +42,9 @@ SRC = \
 	window-list-hidden.c \
 	window-list-children.c \
 	window-list-parents.c \
+	window-list-class.c \
+	window-list-command.c \
+	window-list-type.c \
 	window-is-ignored.c \
 	window-is-managed.c \
 	window-is-hidden.c \
