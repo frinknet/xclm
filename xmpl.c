@@ -9,17 +9,21 @@ xmpl_fork(char *out, char *err)
 	pid_t pid;
 	int fout, ferr;
 
-	fout = open(out, O_WRONLY);
-	ferr = open(err, O_WRONLY);
+	if (out) {
+		fout = open(out, O_WRONLY);
 
-	fflush(stdout);
-	fflush(stderr);
+		fflush(stdout);
+		dup2(fout, 1);
+		close(fout);
+	}
 
-	dup2(fout, 1);
-	dup2(ferr, 2);
+	if (err) {
+		ferr = open(err, O_WRONLY);
 
-	close(fout);
-	close(ferr);
+		fflush(stderr);
+		dup2(ferr, 2);
+		close(ferr);
+	}
 
 	pid = fork();
 
