@@ -1,7 +1,7 @@
-XCB Tools
+XCLM! X Command Line Management
 =========
 
-XCB Tools are the building blocks of a scripted window manager. They can be used in
+XCLM! is the building blocks of a scripted window manager. They can be used in
 conjunction with XCB Watch to script complex window interactions. You can use XCB
 Tools to prototype complext window management scenarios not possible with more high
 level window managers.
@@ -12,7 +12,7 @@ with random executables. You can then selectively add the commands directory to 
 $PATH in control scripts that facilitate window movement.
 
 Each command is intended to be *extremely succinct* in order to demonstrate the
-usage capabilities of XCB. XCB Tools also provides a library of XCB helper functions
+usage capabilities of XCB. XCLM! also provides a library of XCB helper functions
 to encapsulate common actions. As some point we will roll this into a proper library
 to reduce footprint even farther. But first we need to make sure all commands for
 window management exist.
@@ -32,7 +32,7 @@ have a .\_ extension to denote their unfinished status. This way it is easy to s
 where contribution is needed.
 
 Plan
- - XCB Tools: low level tools for window management
+ - XCLM!: low level tools for window management
  - XCB Watch: low level event daemon that watches for X events and fires off scripts
    from a specified directory
  - XCB Hotkeys: watches a hotkey directory for scripts with specifict hotkey names
