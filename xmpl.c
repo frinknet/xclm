@@ -582,7 +582,7 @@ xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 		return;
 	}
 
-	xcb_change_window_attributes(conn, win, XCB_CW_OVERRIDE_REDIRECT, (uint32_t[]){ mask });
+	xcb_change_window_attributes(conn, win, XCB_CW_EVENT_MASK, (uint32_t[]){ mask });
 
 	xcb_flush(conn);
 
@@ -640,7 +640,7 @@ xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir)
 	char *event_name = (char *) malloc(32);
 	xcb_generic_event_t *event;
 
-	xmpl_event_trigger(conn, root, root, "event-watch", event_dir);
+	xmpl_event_trigger(conn, root, root, "watch-start", event_dir);
 
 	while (running) {
 		event = xcb_wait_for_event(conn);
@@ -786,7 +786,10 @@ xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir)
 
 				break;
 			case XCB_MAP_REQUEST:
-				xmpl_event_trigger(conn, root, ((xcb_map_request_event_t*)event)->window, "window-map", event_dir);
+				;xcb_map_request_event_t *map_event = (xcb_map_request_event_t *) event;
+
+				xmpl_event_trigger(conn, root, map_event->window, "window-map", event_dir);
+				xcb_map_window(conn,  map_event->window);
 
 				break;
 			case XCB_REPARENT_NOTIFY:
@@ -852,7 +855,7 @@ xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir)
 
 				break;
 			case XCB_MAPPING_NOTIFY:
-				xmpl_event_trigger(conn, root, 0, "keymap-change", event_dir);
+				xmpl_event_trigger(conn, root, 0, "window-remap", event_dir);
 
 				break;
 			default:
