@@ -577,8 +577,20 @@ xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
 void
 xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 {
+	if (!xmpl_window_is_valid(conn, win)) {
+		fprintf(stderr, "Invalid window 0x%08x\n", win);
+		return;
+	}
+
 	xcb_change_window_attributes(conn, win, XCB_CW_OVERRIDE_REDIRECT, (uint32_t[]){ mask });
+
 	xcb_flush(conn);
+
+	if (xcb_poll_for_event(conn) != NULL) {
+		fprintf(stderr, "Unable to register events for 0x%08x\n", win);
+		return;
+	}
+
 }
 
 /*
@@ -627,6 +639,8 @@ xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir)
 	bool running = true;
 	char *event_name = (char *) malloc(32);
 	xcb_generic_event_t *event;
+
+	xmpl_event_trigger(conn, root, root, "event-watch", event_dir);
 
 	while (running) {
 		event = xcb_wait_for_event(conn);
@@ -863,7 +877,6 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 	//struct dirent prev;
 	struct dirent *entry;
 
-	/*
 	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", event_name);
 
 	if (!win) {
@@ -873,6 +886,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 	} else {
 		return false;
 	}
+	/*
 	*/
 
 	fflush(stdout);
