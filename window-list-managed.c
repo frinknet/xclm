@@ -14,7 +14,7 @@ xcmd_simple {
 			}
 		}
 
-		printf("%s", "\n");
+		printf("\n");
 	}
 
 	xcmd_exit(0);

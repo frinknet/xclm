@@ -155,13 +155,19 @@ xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 {
 	xcb_get_property_cookie_t cookie;
 	xcb_get_property_reply_t *reply;
-	void *value;
+	void *value = NULL;
 
 	cookie = xcb_get_property(conn, 0, win, prop, type, 0L, UINT_MAX);
-	reply = xcb_get_property_reply(conn, cookie, NULL);
-	value = xcb_get_property_value(reply);
 
-	//free(reply);
+	reply = xcb_get_property_reply(conn, cookie, NULL);
+
+	if (reply) {
+		value = xcb_get_property_value(reply);
+	} else if (type == XCB_ATOM_STRING) {
+		value = "";
+	}
+
+	free(reply);
 
 	return value;
 }
@@ -236,6 +242,7 @@ xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t co
 	xcb_get_geometry_reply_t *geom = xmpl_window_get_geometry(conn, win);
 	xcb_clear_area(conn, 1, win, 0, 0, geom->width, geom->height);
 
+	free(geom);
 	xcb_flush(conn);
 }
 
@@ -454,35 +461,6 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 	xcb_screen_t *screen;
 	xcb_colormap_t colormap;
 	xcb_visualid_t visual;
-	char *event_dir = getenv("EVENTS");
-	char *event_path = (char *) malloc(1 + strlen(cls) + strlen(event_dir? event_dir : "~/.events"));
-	const uint32_t mask = XCB_EVENT_MASK_NO_EVENT
-		//
-		| XCB_EVENT_MASK_STRUCTURE_NOTIFY
-		| XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-		//| XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
-		//| XCB_EVENT_MASK_VISIBILITY_CHANGE
-		//| XCB_EVENT_MASK_ENTER_WINDOW
-		//| XCB_EVENT_MASK_LEAVE_WINDOW
-		//| XCB_EVENT_MASK_PROPERTY_CHANGE
-		//| XCB_EVENT_MASK_FOCUS_CHANGE
-		//| XCB_EVENT_MASK_EXPOSURE
-		//| XCB_EVENT_MASK_COLOR_MAP_CHANGE
-		//
-		//| XCB_EVENT_MASK_POINTER_MOTION
-		//| XCB_EVENT_MASK_POINTER_MOTION_HINT
-		| XCB_EVENT_MASK_BUTTON_PRESS
-		//| XCB_EVENT_MASK_BUTTON_RELEASE
-		//| XCB_EVENT_MASK_BUTTON_1_MOTION
-		//| XCB_EVENT_MASK_BUTTON_2_MOTION
-		//| XCB_EVENT_MASK_BUTTON_3_MOTION
-		//| XCB_EVENT_MASK_BUTTON_4_MOTION
-		//| XCB_EVENT_MASK_BUTTON_5_MOTION
-		//| XCB_EVENT_MASK_BUTTON_MOTION
-		//| XCB_EVENT_MASK_OWNER_GRAB_BUTTON
-		;
-
-	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", cls);
 
 	xmpl_screen_init(conn, &screen);
 	xmpl_color_init(conn, screen, &colormap, &visual);
@@ -504,20 +482,6 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 	);
 
 	xmpl_window_set_property(conn, win, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, cls);
-	xmpl_event_register(conn, win, mask);
-
-	/*
-	if (xcb_poll_for_event(conn) != NULL) {
-		return win;
-	}
-
-	
-	if (!xmpl_fork("/dev/null", "/dev/null")) {
-		xmpl_event_loop(conn, win, event_path);
-
-		return win;
-	}
-	*/
 
 	return win;
 }
