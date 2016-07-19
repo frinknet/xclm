@@ -218,6 +218,10 @@ xmpl_window_get_type(xcb_connection_t *conn, xcb_window_t win)
 
 	atom = (xcb_atom_t *) xmpl_window_get_property(conn, win, xmpl_atom(conn, "_NET_WM_WINDOW_TYPE"), XCB_ATOM_ATOM);
 
+	if (!atom) {
+		return "";
+	}
+
 	return xmpl_atom_name(conn, *atom);
 }
 
