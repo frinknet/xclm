@@ -53,6 +53,7 @@ SRC = \
 	window-is-command.c \
 	window-is-type.c \
 	window-is-valid.c \
+	window-is-bordered.c \
 	window-root.c \
 	window-current.c
 

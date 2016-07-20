@@ -365,17 +365,15 @@ int
 xmpl_window_is_bordered(xcb_connection_t *conn, xcb_window_t win)
 {
 	int border;
-	xcb_get_window_attributes_reply_t  *attr;
+	xcb_get_geometry_reply_t *geom = xmpl_window_get_geometry(conn, win);
 
-	attr = xmpl_window_get_attributes(conn, win);
-
-	if (attr == NULL) {
+	if (geom == NULL) {
 		return 0;
 	}
 
-	border = attr->map_state;
+	border = geom->border_width;
 
-	free(attr);
+	free(geom);
 
 	return border > 0;
 }

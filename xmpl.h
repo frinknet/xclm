@@ -38,6 +38,7 @@ void xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, i
 int xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win);
 int xmpl_window_is_mapped(xcb_connection_t *conn, xcb_window_t win);
 int xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win);
+int xmpl_window_is_bordered(xcb_connection_t *conn, xcb_window_t win);
 
 int xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list);
 
