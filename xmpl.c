@@ -333,7 +333,7 @@ xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win)
 	reply = xcb_get_geometry_reply(conn, cookie, NULL);
 
 	if (!reply) {
-		errx(1, "center_pointer: missing geometry!");
+		errx(1, "unable to retrieve geometry!");
 	}
 
 	return reply;
@@ -356,6 +356,28 @@ xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win)
 	free(attr);
 
 	return 1;
+}
+
+/**
+ * Check that Window is Bordered
+ */
+int
+xmpl_window_is_bordered(xcb_connection_t *conn, xcb_window_t win)
+{
+	int border;
+	xcb_get_window_attributes_reply_t  *attr;
+
+	attr = xmpl_window_get_attributes(conn, win);
+
+	if (attr == NULL) {
+		return 0;
+	}
+
+	border = attr->map_state;
+
+	free(attr);
+
+	return border > 0;
 }
 
 /**
@@ -877,7 +899,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 	char *event_path = (char *) malloc(1 + strlen(event_name) + strlen(event_dir? event_dir : "~/.events"));
 	char *event_cmd;
 	DIR *dir;
-	//struct dirent prev;
+	struct stat statbuf;
 	struct dirent *entry;
 
 	sprintf(event_path, "%s/%s", event_dir? event_dir : "~/.events", event_name);
@@ -887,6 +909,8 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 	} else if (!xmpl_window_is_ignored(conn, win)) {
 		printf("event-trigger %s 0x%08x\n", event_name, win);
 	} else {
+		printf("event-ignored %s 0x%08x\n", event_name, win);
+
 		return false;
 	}
 	/*
@@ -897,16 +921,21 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 	dir = opendir(event_path);
 
 	if (dir == NULL) {
-		//fprintf(stderr, "failed dir: %s\n", event_path);
+		if (
+			stat(event_path, &statbuf) != 0 ||
+			statbuf.st_mode <= 0 ||
+			!(S_IXUSR & statbuf.st_mode)
+		) {
+			return false;
+		}
 
-		return false;
+		xmpl_event_spawn(root, win, event_path, true);
+
+		return true;
 	}
 
 	while ((entry = readdir(dir)) != NULL) {
-		if (
-			(strcmp(entry->d_name, ".") == 0) ||
-			(strcmp(entry->d_name, "..") == 0)
-		) {
+		if (!strncmp(entry->d_name, ".", 1)) {
 			continue;
 		}
 
@@ -935,7 +964,9 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn
 		NULL
 	};
 
-	if ((pid = spawn? xmpl_fork("/dev/null", "/dev/null") : 0)) {
+	printf("event-spawn %s 0x%08x\n", cmd_path, win);
+
+	if ((pid = spawn? xmpl_fork(NULL, NULL) : 0)) {
 			return pid;
 	}
 
@@ -944,15 +975,12 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn
 		statbuf.st_mode <= 0 ||
 		!(S_IXUSR & statbuf.st_mode)
 	) {
-		fprintf(stderr, "failed stat: %s\n", cmd_path);
-
-		return 0;
+		fprintf(stderr, "not executable: %s\n", cmd_path);
+	} else if (execve(cmd_path, cmd, xmpl_event_env(root, win))) {
+		fprintf(stderr, "execution error: %s\n", cmd_path);
 	}
 
-	execve(cmd_path, cmd, xmpl_event_env(root, win));
-	fprintf(stderr, "failed exec: %s\n", cmd_path);
-
-	exit(1);
+	return pid;
 }
 
 /**
@@ -961,10 +989,11 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn
 char **
 xmpl_event_env(xcb_window_t root, xcb_window_t win)
 {
+	char *x_display = getenv("DISPLAY");
 	char *events_dir = getenv("EVENTS");
 	char *path_dir = getenv("PATH");
 	char *cmd_dir = getenv("COMMANDS");
-	char *env[5];
+	char *env[6];
 
 	env[0] = (char *) malloc(32);
 
@@ -1001,7 +1030,11 @@ xmpl_event_env(xcb_window_t root, xcb_window_t win)
 
 	sprintf(env[3], "PATH=%s:%s", path_dir, cmd_dir);
 
-	env[4] = NULL;
+	env[4] = (char *) malloc(8 + strlen(x_display));
+
+	sprintf(env[4], "DISPLAY=%s", x_display);
+
+	env[5] = NULL;
 
 	char **ret = malloc(sizeof(env));
 
