@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sleep 0.1
+window-border 2 330044 $WINDOW
