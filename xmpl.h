@@ -33,8 +33,8 @@ void xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32
 void xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack);
 void xmpl_window_set_ignore(xcb_connection_t *conn, xcb_window_t win, int override);
 void xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y);
-void xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int width, int height);
-void xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height);
+void xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int w, int h);
+void xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int w, int h);
 
 int xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win);
 int xmpl_window_is_mapped(xcb_connection_t *conn, xcb_window_t win);
@@ -43,7 +43,7 @@ int xmpl_window_is_bordered(xcb_connection_t *conn, xcb_window_t win);
 
 int xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t **list);
 
-xcb_window_t xmpl_window_create(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height, char *cls);
+xcb_window_t xmpl_window_create(xcb_connection_t *conn, xcb_window_t win, int x, int y, int w, int h, char *cls);
 xcb_window_t xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win);
 
 xcb_get_geometry_reply_t *xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win);

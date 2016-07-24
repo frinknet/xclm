@@ -284,12 +284,12 @@ xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
  * Set Size for Window
  */
 void
-xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int width, int height)
+xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int w, int h)
 {
 	xcb_configure_window(
 		conn, win,
 		XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-		(uint32_t[]){ width, height }
+		(uint32_t[]){ w, h }
 	);
 
 	xcb_flush(conn);
@@ -314,7 +314,7 @@ xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y)
  * Set Geometry for Window
  */
 void
-xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int width, int height)
+xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int w, int h)
 {
 	xcb_configure_window(
 		conn, win,
@@ -322,7 +322,7 @@ xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y,
 			XCB_CONFIG_WINDOW_Y |
 			XCB_CONFIG_WINDOW_WIDTH |
 			XCB_CONFIG_WINDOW_HEIGHT,
-		(uint32_t[]){ x, y, width, height }
+		(uint32_t[]){ x, y, w, h }
 	);
 
 	xcb_flush(conn);
@@ -487,7 +487,7 @@ xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win)
  * Create a new Window
  */
 xcb_window_t
-xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, int width, int height, char *cls)
+xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, int w, int h, char *cls)
 {
 	xcb_window_t win = xcb_generate_id(conn);
 	xcb_screen_t *screen;
@@ -502,7 +502,7 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
 		(visual == screen->root_visual)? XCB_COPY_FROM_PARENT : 32,
 		win,
 		parent,
-		x, y, width, height, 0,
+		x, y, w, h, 0,
 		XCB_WINDOW_CLASS_INPUT_OUTPUT,
 		visual,
 			XCB_CW_BORDER_PIXEL |
@@ -1067,7 +1067,7 @@ xmpl_mouse_center_window(xcb_connection_t conn, xcb_window_t win)
 	geom = xmpl_window_get_geometry(conn, win);
 
 	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0,
-			(geom->width  + (geom->border_width * 2)) / 2,
+			(geom->width + (geom->border_width * 2)) / 2,
 			(geom->height + (geom->border_width * 2)) / 2);
 
 	values[0] = XCB_STACK_MODE_ABOVE;
