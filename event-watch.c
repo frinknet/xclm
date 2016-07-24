@@ -32,5 +32,5 @@ xcmd_windows (3, "event-dir") {
 		| XCB_EVENT_MASK_OWNER_GRAB_BUTTON
 		;
 
-	xcmd_win_exec(xmpl_event_loop(xcmd_conn, xcmd_win, event_dir, mask));
+	xcmd_win_exec(xmpl_event_watch(xcmd_conn, xcmd_win, event_dir, mask));
 }

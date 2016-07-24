@@ -660,20 +660,20 @@ xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 }
 
 /**
- * Run an Event Loop
+ * Register events and run an Event Loop
  */
 void
-xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask)
+xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask)
 {
 	char *event_name = (char *) malloc(32);
 	xcb_generic_event_t *event;
-	xcb_window_t *child;
+	xcb_window_t *win;
 
 	xmpl_event_register(conn, root, mask);
-	xmpl_window_list_children(conn, root, &child);
+	xmpl_window_list_children(conn, root, &win);
 
-	while (*child) {
-		xmpl_event_register(conn, *child++, mask);
+	while (*win) {
+		xmpl_event_register(conn, *win++, mask);
 	}
 
 	xmpl_event_trigger(conn, root, root, "watch-start", event_dir);
