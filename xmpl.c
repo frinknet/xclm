@@ -35,6 +35,14 @@ xmpl_fork(char *out, char *err)
 	return pid;
 }
 
+void
+xmpl_free(void *var)
+{
+	if (var) {
+		free(var);
+	}
+}
+
 /**
  * Intialize the Connection
  */
@@ -68,7 +76,7 @@ xmpl_conn_sync(xcb_connection_t *conn)
 {
 	xcb_flush(conn);
 
-	free(xcb_get_input_focus_reply(conn, xcb_get_input_focus(conn), NULL));
+	xmpl_free(xcb_get_input_focus_reply(conn, xcb_get_input_focus(conn), NULL));
 }
 
 /**
@@ -167,7 +175,7 @@ xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 		value = "";
 	}
 
-	free(reply);
+	xmpl_free(reply);
 
 	return value;
 }
@@ -246,7 +254,7 @@ xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t co
 	xcb_get_geometry_reply_t *geom = xmpl_window_get_geometry(conn, win);
 	xcb_clear_area(conn, 1, win, 0, 0, geom->width, geom->height);
 
-	free(geom);
+	xmpl_free(geom);
 	xcb_flush(conn);
 }
 
@@ -353,7 +361,7 @@ xmpl_window_is_valid(xcb_connection_t *conn, xcb_window_t win)
 		return 0;
 	}
 
-	free(attr);
+	xmpl_free(attr);
 
 	return 1;
 }
@@ -373,7 +381,7 @@ xmpl_window_is_bordered(xcb_connection_t *conn, xcb_window_t win)
 
 	border = geom->border_width;
 
-	free(geom);
+	xmpl_free(geom);
 
 	return border > 0;
 }
@@ -395,7 +403,7 @@ xmpl_window_is_mapped(xcb_connection_t *conn, xcb_window_t win)
 
 	mapped = attr->map_state;
 
-	free(attr);
+	xmpl_free(attr);
 
 	return mapped == XCB_MAP_STATE_VIEWABLE;
 }
@@ -417,7 +425,7 @@ xmpl_window_is_ignored(xcb_connection_t *conn, xcb_window_t win)
 
 	override = attr->override_redirect;
 
-	free(attr);
+	xmpl_free(attr);
 
 	return override;
 }
@@ -446,7 +454,7 @@ xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t
 
 	childnum = reply->children_len;
 
-	free(reply);
+	xmpl_free(reply);
 
 	return childnum;
 }
@@ -470,7 +478,7 @@ xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win)
 
 	parent = reply->parent;
 
-	free(reply);
+	xmpl_free(reply);
 
 	return parent;
 }
@@ -530,7 +538,7 @@ xmpl_window_get_current(xcb_connection_t *conn)
 
 	win = reply->focus;
 
-	free(reply);
+	xmpl_free(reply);
 
 	return win;
 }
@@ -558,7 +566,7 @@ xmpl_atom(xcb_connection_t *conn, char *atom_name)
 
 	atom = reply->atom;
 
-	free(reply);
+	xmpl_free(reply);
 
 	return atom;
 }
@@ -586,7 +594,7 @@ xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
 
 	atom_name = xcb_get_atom_name_name(reply);
 
-	free(reply);
+	xmpl_free(reply);
 
 	return atom_name;
 }
@@ -599,6 +607,7 @@ xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 {
 	if (!xmpl_window_is_valid(conn, win)) {
 		fprintf(stderr, "Invalid window 0x%08x\n", win);
+
 		return;
 	}
 
@@ -608,9 +617,9 @@ xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 
 	if (xcb_poll_for_event(conn) != NULL) {
 		fprintf(stderr, "Unable to register events for 0x%08x\n", win);
+
 		return;
 	}
-
 }
 
 /*
@@ -654,15 +663,22 @@ xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
  * Run an Event Loop
  */
 void
-xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir)
+xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask)
 {
-	bool running = true;
 	char *event_name = (char *) malloc(32);
 	xcb_generic_event_t *event;
+	xcb_window_t *child;
+
+	xmpl_event_register(conn, root, mask);
+	xmpl_window_list_children(conn, root, &child);
+
+	while (*child) {
+		xmpl_event_register(conn, *child++, mask);
+	}
 
 	xmpl_event_trigger(conn, root, root, "watch-start", event_dir);
 
-	while (running) {
+	while (conn) {
 		event = xcb_wait_for_event(conn);
 
 		switch (event->response_type & ~0x80) {
@@ -786,7 +802,7 @@ xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir)
 			case XCB_CREATE_NOTIFY:
 				xmpl_event_trigger(conn, root, ((xcb_create_notify_event_t*)event)->window, "window-create", event_dir);
 
-				xmpl_event_register(conn, ((xcb_create_notify_event_t*)event)->window, 0);
+				xmpl_event_register(conn, ((xcb_create_notify_event_t*)event)->window, mask);
 
 				break;
 			case XCB_DESTROY_NOTIFY:
@@ -883,9 +899,9 @@ xmpl_event_loop(xcb_connection_t *conn, xcb_window_t root, char *event_dir)
 
 				xmpl_event_trigger(conn, root, 0, event_name, event_dir);
 		}
-	}
 
-	free(event);
+		xmpl_free(event);
+	}
 }
 
 /**
@@ -1058,6 +1074,6 @@ xmpl_mouse_center_window(xcb_connection_t conn, xcb_window_t win)
 
 	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE, values);
 
-	free(geom);
+	xmpl_free(geom);
 }
 */

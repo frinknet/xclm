@@ -80,7 +80,7 @@ xcmd_windows (3, "event-dir") {
 					}
 			}
 
-			free(xevent);
+			xmpl_free(xevent);
 		}
 	}
 

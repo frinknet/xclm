@@ -54,6 +54,7 @@ SRC = \
 	window-is-type.c \
 	window-is-valid.c \
 	window-is-bordered.c \
+	window-is-focussed.c \
 	window-root.c \
 	window-current.c
 
