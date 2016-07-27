@@ -43,7 +43,7 @@ xcmd_call (7, "parent x y width height class") {
 	printf("0x%08x\n", win);
 
 	if (xmpl_fork("/dev/null", "/dev/null")) {
-		 exit(0);
+		 return 0;
 	} else {
 		xmpl_event_watch(xcmd_conn, win, event_path, mask);
 	}
