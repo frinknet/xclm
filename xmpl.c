@@ -718,7 +718,9 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 						break;
 					default:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-down-button", event_dir);
+						sprintf(event_name, "mouse-down-button-%d", press_event->detail);
+
+						xmpl_event_trigger(conn, root, press_event->event, event_name, event_dir);
 				}
 
 				break;
@@ -740,6 +742,17 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 						xmpl_event_trigger(conn, root, release_event->event, "mouse-up-right", event_dir);
 
 						break;
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+						//avoid release for scroll buttons
+
+						break;
+					default:
+						sprintf(event_name, "mouse-up-button-%d", release_event->detail);
+
+						xmpl_event_trigger(conn, root, release_event->event, event_name, event_dir);
 				}
 
 
