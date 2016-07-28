@@ -1,5 +1,7 @@
 #!/bin/bash
 
+window-focus $WINDOW
+
 window-border 2 770099 $WINDOW
 sleep 0.15
 window-border 2 660088 $WINDOW

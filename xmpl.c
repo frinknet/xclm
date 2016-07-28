@@ -1,12 +1,11 @@
 #include "xmpl.h"
 
 /**
- * Daemonize a Process
+ * change logging
  */
-int
-xmpl_fork(char *out, char *err)
+void
+xmpl_logging(char *out, char *err)
 {
-	pid_t pid;
 	int fout, ferr;
 
 	if (out) {
@@ -24,16 +23,8 @@ xmpl_fork(char *out, char *err)
 		dup2(ferr, 2);
 		close(ferr);
 	}
-
-	pid = fork();
-
-	if (pid == -1) {
-		fprintf(stderr, "failed to fork properly\n");
-		exit(1);
-	}
-
-	return pid;
 }
+
 
 void
 xmpl_free(void *var)
@@ -605,6 +596,8 @@ xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
 void
 xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 {
+	xcb_window_t *children;
+
 	if (!xmpl_window_is_valid(conn, win)) {
 		fprintf(stderr, "Invalid window 0x%08x\n", win);
 
@@ -619,6 +612,12 @@ xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 		fprintf(stderr, "Unable to register events for 0x%08x\n", win);
 
 		return;
+	}
+
+	xmpl_window_list_children(conn, win, &children);
+
+	while (*children) {
+		xmpl_event_register(conn, *children++, mask);
 	}
 }
 
@@ -651,7 +650,7 @@ xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 	switch (notify->mode) {
 	case XCB_NOTIFY_MODE_NORMAL:
 	case XCB_NOTIFY_MODE_UNGRAB:
-		if (notify->detail == 0) {
+		if (notify->detail != XCB_NOTIFY_DETAIL_INFERIOR) {
 			return true;
 		}
 	}
@@ -667,14 +666,8 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 {
 	char *event_name = (char *) malloc(32);
 	xcb_generic_event_t *event;
-	xcb_window_t *win;
 
 	xmpl_event_register(conn, root, mask);
-	xmpl_window_list_children(conn, root, &win);
-
-	while (*win) {
-		xmpl_event_register(conn, *win++, mask);
-	}
 
 	xmpl_event_trigger(conn, root, root, "watch-start", event_dir);
 
@@ -682,8 +675,6 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 		event = xcb_wait_for_event(conn);
 
 		switch (event->response_type & ~0x80) {
-			case 0:
-				break;
 			case XCB_KEY_PRESS:
 				xmpl_event_trigger(conn, root, ((xcb_key_press_event_t*)event)->event, "key-down", event_dir);
 
@@ -754,20 +745,18 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 				break;
 			case XCB_MOTION_NOTIFY:
-				if (xmpl_event_notify_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_motion_notify_event_t*)event)->event, "mouse-move", event_dir);
-				}
+				xmpl_event_trigger(conn, root, ((xcb_motion_notify_event_t*)event)->event, "mouse-move", event_dir);
 
 				break;
 			case XCB_ENTER_NOTIFY:
 				if (xmpl_event_notify_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "mouse-in", event_dir);
+					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "window-enter", event_dir);
 				}
 
 				break;
 			case XCB_LEAVE_NOTIFY:
 				if (xmpl_event_notify_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "mouse-out", event_dir);
+					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "window-leave", event_dir);
 				}
 
 				break;
@@ -927,10 +916,6 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 
 		return false;
 	}
-	/*
-	*/
-
-	fflush(stdout);
 
 	dir = opendir(event_path);
 
@@ -943,7 +928,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 			return false;
 		}
 
-		xmpl_event_spawn(root, win, event_path, true);
+		xmpl_event_spawn(root, win, event_path, 15);
 
 		return true;
 	}
@@ -957,7 +942,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 
 		sprintf(event_cmd, "%s/%s", event_path, entry->d_name);
 
-		xmpl_event_spawn(root, win, event_cmd, true);
+		xmpl_event_spawn(root, win, event_cmd, 5);
 	}
 
 	closedir(dir);
@@ -968,8 +953,8 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 /**
  * Event Spawn
  */
-pid_t
-xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn)
+void
+xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeout)
 {
 	pid_t pid;
 	struct stat statbuf;
@@ -977,24 +962,43 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn
 		cmd_path,
 		NULL
 	};
+	int status;
 
 	printf("event-spawn %s 0x%08x\n", cmd_path, win);
 
-	if ((pid = spawn? xmpl_fork(NULL, NULL) : 0)) {
-			return pid;
+	// fork parent to start async process
+	if ((pid = fork())) {
+		waitpid(-1, &status, WNOHANG);
+
+		return;
 	}
 
-	if (
-		stat(cmd_path, &statbuf) != 0 ||
-		statbuf.st_mode <= 0 ||
-		!(S_IXUSR & statbuf.st_mode)
-	) {
+	// fork child to orphan the process
+	if ((pid = fork())) {
+		exit(0);
+	}
+
+	// babysitter will put babies to sleep
+	if ((pid = fork())) {
+		sleep(timeout);
+		kill(pid, SIGKILL);
+		exit(0);
+	}
+
+	// check executability
+	if (stat(cmd_path, &statbuf) != 0 || statbuf.st_mode <= 0 || !(S_IXUSR & statbuf.st_mode)) {
 		fprintf(stderr, "not executable: %s\n", cmd_path);
-	} else if (execve(cmd_path, cmd, xmpl_event_env(root, win))) {
-		fprintf(stderr, "execution error: %s\n", cmd_path);
+		
+		exit(1);
 	}
 
-	return pid;
+	// run program
+	execve(cmd_path, cmd, xmpl_event_env(root, win));
+
+	// report error
+	fprintf(stderr, "execution error: %s\n", cmd_path);
+
+	exit(1);
 }
 
 /**

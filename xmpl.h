@@ -3,6 +3,7 @@
 
 #define _XOPEN_SOURCE
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <err.h>
 #include <stdio.h>
@@ -17,8 +18,9 @@
 #include <xcb/xcb.h>
 //#include <xcb/xcb_icccm.h>
 
-int xmpl_fork(char *out, char *err);
 void xmpl_free(void *var);
+
+void xmpl_logging(char *out, char *err);
 
 void xmpl_conn_init(xcb_connection_t **conn);
 void xmpl_conn_kill(xcb_connection_t **conn);
@@ -69,7 +71,7 @@ bool xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t* event)
 bool xmpl_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event);
 void xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask);
 bool xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, char *event_name, char *event_dir);
-pid_t xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, bool spawn);
+void xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeout);
 char **xmpl_event_env(xcb_window_t root, xcb_window_t win);
 
 #endif

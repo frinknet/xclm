@@ -1,5 +1,0 @@
-#!/bin/bash
-
-if (! window-is-focussed $WINDOW); then
-	window-focus $WINDOW
-fi
