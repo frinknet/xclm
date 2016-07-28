@@ -74,4 +74,6 @@ bool xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t 
 void xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeout);
 char **xmpl_event_env(xcb_window_t root, xcb_window_t win);
 
+void xmpl_pointer_center(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_pointer_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y);
 #endif

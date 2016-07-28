@@ -1074,9 +1074,8 @@ xmpl_event_env(xcb_window_t root, xcb_window_t win)
 	return ret;
 }
 
-/*
 void
-xmpl_mouse_center_window(xcb_connection_t conn, xcb_window_t win)
+xmpl_pointer_center(xcb_connection_t *conn, xcb_window_t win)
 {
 	uint32_t values[1];
 	xcb_get_geometry_reply_t *geom;
@@ -1093,4 +1092,9 @@ xmpl_mouse_center_window(xcb_connection_t conn, xcb_window_t win)
 
 	xmpl_free(geom);
 }
-*/
+
+void
+xmpl_pointer_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y)
+{
+	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0, x, y);
+}
