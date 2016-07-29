@@ -54,7 +54,7 @@ void
 xmpl_conn_kill(xcb_connection_t **conn)
 {
 	if (*conn) {
-		xcb_flush(*conn);
+		xmpl_conn_sync(*conn);
 		xcb_disconnect(*conn);
 	}
 }
@@ -231,7 +231,7 @@ void
 xmpl_window_set_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
 {
 	xcb_change_window_attributes(conn, win, XCB_CW_OVERRIDE_REDIRECT, (uint32_t[]){ override });
-	xcb_flush(conn);
+	xmpl_conn_sync(conn);
 }
 
 /**
@@ -246,7 +246,7 @@ xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t co
 	xcb_clear_area(conn, 1, win, 0, 0, geom->width, geom->height);
 
 	xmpl_free(geom);
-	xcb_flush(conn);
+	xmpl_conn_sync(conn);
 }
 
 /**
@@ -258,7 +258,7 @@ xmpl_window_set_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, 
 	xcb_change_window_attributes(conn, win, XCB_CW_BORDER_PIXEL, (uint32_t[]){ color });
 	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_BORDER_WIDTH, (uint32_t[]){ size });
 
-	xcb_flush(conn);
+	xmpl_conn_sync(conn);
 }
 
 /**
@@ -268,7 +268,7 @@ void
 xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
 {
 	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE, (uint32_t[]){ stack });
-	xcb_flush(conn);
+	xmpl_conn_sync(conn);
 }
 
 /**
@@ -283,7 +283,7 @@ xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int w, int h)
 		(uint32_t[]){ w, h }
 	);
 
-	xcb_flush(conn);
+	xmpl_conn_sync(conn);
 }
 
 /**
@@ -298,7 +298,7 @@ xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 		(uint32_t[]){ x, y }
 	);
 
-	xcb_flush(conn);
+	xmpl_conn_sync(conn);
 }
 
 /**
@@ -316,7 +316,7 @@ xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y,
 		(uint32_t[]){ x, y, w, h }
 	);
 
-	xcb_flush(conn);
+	xmpl_conn_sync(conn);
 }
 
 /**
@@ -552,7 +552,9 @@ xmpl_atom(xcb_connection_t *conn, char *atom_name)
 	reply = xcb_intern_atom_reply(conn, cookie, NULL);
 
 	if (!reply) {
-	  return XCB_NONE;
+		fprintf(stderr, "Could not create atom for %s\n", atom_name);
+		
+		exit(1);
 	}
 
 	atom = reply->atom;
@@ -597,6 +599,11 @@ void
 xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 {
 	xcb_window_t *children;
+	xcb_grab_pointer_cookie_t pointer_cookie;
+	xcb_void_cookie_t button_cookie;
+	xcb_void_cookie_t key_cookie;
+	xcb_void_cookie_t cookie;
+	xcb_generic_error_t *error;
 
 	if (!xmpl_window_is_valid(conn, win)) {
 		fprintf(stderr, "Invalid window 0x%08x\n", win);
@@ -604,24 +611,302 @@ xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask)
 		return;
 	}
 
-	xcb_change_window_attributes(conn, win, XCB_CW_EVENT_MASK, (uint32_t[]){ mask });
+	fprintf(stderr, "Registering structure 0x%08x\n", win);
 
-	xcb_flush(conn);
+	cookie = xcb_change_window_attributes_checked(conn, win, XCB_CW_EVENT_MASK, (uint32_t[]){ mask
+			& ~XMPL_EVENT_MASK_POINTER
+			& ~XMPL_EVENT_MASK_BUTTONS
+			& ~XMPL_EVENT_MASK_KEYS
+		});
+	error = xcb_request_check(conn, cookie);
 
-	if (xcb_poll_for_event(conn) != NULL) {
+	if (error == NULL && mask & XMPL_EVENT_MASK_POINTER) {
+		fprintf(stderr, "Registering pointer 0x%08x\n", win);
+		pointer_cookie = xcb_grab_pointer(conn, false, win, mask & XMPL_EVENT_MASK_POINTER,
+			XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE, XCB_TIME_CURRENT_TIME);
+
+		xcb_grab_pointer_reply(conn, pointer_cookie, &error);
+	}
+
+	if (error == NULL && mask & XMPL_EVENT_MASK_BUTTONS) {
+		fprintf(stderr, "Registering buttons 0x%08x\n", win);
+		button_cookie = xcb_grab_button(conn, false, win, mask & XMPL_EVENT_MASK_BUTTONS,
+			XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
+			XCB_BUTTON_INDEX_ANY, XCB_MOD_MASK_ANY);
+
+		error = xcb_request_check(conn, button_cookie);
+	}
+
+	if (error == NULL && mask & XMPL_EVENT_MASK_KEYS) {
+		fprintf(stderr, "Registering keys 0x%08x\n", win);
+		key_cookie = xcb_grab_key(conn, false, win, mask & XMPL_EVENT_MASK_KEYS,
+			XCB_GRAB_ANY, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+
+		error = xcb_request_check(conn, key_cookie);
+	}
+
+	if (error != NULL) {
 		fprintf(stderr, "Unable to register events for 0x%08x\n", win);
 
 		return;
 	}
 
-	xmpl_window_list_children(conn, win, &children);
+	for (xmpl_window_list_children(conn, win, &children); *children; ++children) {
+		xmpl_event_register(conn, *children, mask);
+	}
 
-	while (*children) {
-		xmpl_event_register(conn, *children++, mask);
+	xmpl_conn_sync(conn);
+}
+
+/**
+ * Register events and run an Event Loop
+ */
+void
+xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask)
+{
+	char *event_name = malloc(32);
+	char *env = NULL;
+	xcb_generic_event_t *event;
+	xcb_button_press_event_t *press_event;
+	xcb_button_release_event_t *release_event;
+	xcb_reparent_notify_event_t *reparent_event;
+
+	xmpl_event_register(conn, root, mask);
+	xmpl_event_trigger(conn, root, root, "watch-start", event_dir, env);
+
+	while (conn) {
+		event = xcb_wait_for_event(conn);
+
+		switch (event->response_type & ~0x80) {
+			case 0:
+				break;
+			case XCB_KEY_PRESS:
+				xmpl_event_trigger(conn, root, ((xcb_key_press_event_t*)event)->event, "key-down", event_dir, env);
+
+				break;
+			case XCB_KEY_RELEASE:
+				xmpl_event_trigger(conn, root, ((xcb_key_release_event_t*)event)->event, "key-up", event_dir, env);
+
+				break;
+			case XCB_BUTTON_PRESS:
+				press_event = (xcb_button_press_event_t *) event;
+
+				switch (press_event->detail) {
+					case 1:
+						sprintf(event_name, "mouse-down-left");
+
+						break;
+					case 2:
+						sprintf(event_name, "mouse-down-middle");
+
+						break;
+					case 3:
+						sprintf(event_name, "mouse-down-right");
+
+						break;
+					case 4:
+						sprintf(event_name, "mouse-scroll-up");
+
+						break;
+					case 5:
+						sprintf(event_name, "mouse-scroll-down");
+
+						break;
+					case 6:
+						sprintf(event_name, "mouse-scroll-left");
+
+						break;
+					case 7:
+						sprintf(event_name, "mouse-scroll-right");
+
+						break;
+					default:
+						sprintf(event_name, "mouse-down-button-%d", press_event->detail);
+				}
+
+				xmpl_event_trigger(conn, root, press_event->event, event_name, event_dir, env);
+
+				break;
+			case XCB_BUTTON_RELEASE:
+				release_event = (xcb_button_release_event_t *) event;
+
+				switch (release_event->detail) {
+					case 1:
+						sprintf(event_name, "mouse-up-left");
+
+						break;
+					case 2:
+						sprintf(event_name, "mouse-up-middle");
+
+						break;
+					case 3:
+						sprintf(event_name, "mouse-up-right");
+
+						break;
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+						//avoid release for scroll buttons
+
+						continue;
+					default:
+						sprintf(event_name, "mouse-up-button-%d", release_event->detail);
+				}
+
+				xmpl_event_trigger(conn, root, release_event->event, event_name, event_dir, env);
+				xmpl_free(release_event);
+
+				break;
+			case XCB_MOTION_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_motion_notify_event_t*)event)->event, "mouse-move", event_dir, env);
+
+				break;
+			case XCB_ENTER_NOTIFY:
+				if (xmpl_event_notify_valid(conn, event)) {
+					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "window-enter", event_dir, env);
+				}
+
+				break;
+			case XCB_LEAVE_NOTIFY:
+				if (xmpl_event_notify_valid(conn, event)) {
+					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "window-leave", event_dir, env);
+				}
+
+				break;
+			case XCB_FOCUS_IN:
+				xmpl_event_trigger(conn, root, ((xcb_focus_in_event_t*)event)->event, "window-focus", event_dir, env);
+
+				break;
+			case XCB_FOCUS_OUT:
+				xmpl_event_trigger(conn, root, ((xcb_focus_in_event_t*)event)->event, "window-blur", event_dir, env);
+
+				break;
+			case XCB_KEYMAP_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_button_release_event_t*)event)->event, "keymap-notify", event_dir, env);
+
+				break;
+			case XCB_EXPOSE:
+				xmpl_event_trigger(conn, root, ((xcb_expose_event_t*)event)->window, "window-expose", event_dir, env);
+
+				break;
+			case XCB_GRAPHICS_EXPOSURE:
+				xmpl_event_trigger(conn, root, ((xcb_expose_event_t*)event)->window, "window-exposure", event_dir, env);
+
+				break;
+			case XCB_NO_EXPOSURE:
+				xmpl_event_trigger(conn, root, ((xcb_expose_event_t*)event)->window, "window-no-expose", event_dir, env);
+
+				break;
+			case XCB_VISIBILITY_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_visibility_notify_event_t*)event)->window, "window-visible", event_dir, env);
+
+				break;
+			case XCB_CREATE_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_create_notify_event_t*)event)->window, "window-create", event_dir, env);
+				xmpl_event_register(conn, ((xcb_create_notify_event_t*)event)->window, mask);
+
+				break;
+			case XCB_DESTROY_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_create_notify_event_t*)event)->window, "window-destroy", event_dir, env);
+
+				break;
+			case XCB_UNMAP_NOTIFY:
+				if (xmpl_event_configure_valid(conn, event)) {
+					xmpl_event_trigger(conn, root, ((xcb_unmap_notify_event_t*)event)->window, "window-hide", event_dir, env);
+				}
+
+				break;
+			case XCB_MAP_NOTIFY:
+				if (xmpl_event_configure_valid(conn, event)) {
+					xmpl_event_trigger(conn, root, ((xcb_map_notify_event_t*)event)->window, "window-show", event_dir, env);
+				}
+
+				break;
+			case XCB_MAP_REQUEST:
+				xmpl_event_register(conn, ((xcb_create_notify_event_t*)event)->window, mask);
+				xcb_map_window(conn,  ((xcb_create_notify_event_t*)event)->window);
+
+				break;
+			case XCB_REPARENT_NOTIFY:
+				reparent_event = (xcb_reparent_notify_event_t *) event;
+
+				if (reparent_event->parent == root) {
+					xmpl_event_trigger(conn, root, reparent_event->window, "reparent-incoming", event_dir, env);
+				} else {
+					xmpl_event_trigger(conn, root, reparent_event->window, "reparent-outgoing", event_dir, env);
+				}
+
+				xmpl_free(reparent_event);
+
+				break;
+			case XCB_CONFIGURE_NOTIFY:
+				if (xmpl_event_configure_valid(conn, event)) {
+					xmpl_event_trigger(conn, root, ((xcb_configure_notify_event_t*)event)->window, "config-finish", event_dir, env);
+				}
+
+				break;
+			case XCB_CONFIGURE_REQUEST:
+				if (xmpl_event_configure_valid(conn, event)) {
+					xmpl_event_trigger(conn, root, ((xcb_configure_request_event_t*)event)->window, "config-begin", event_dir, env);
+				}
+
+				break;
+			case XCB_GRAVITY_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_gravity_notify_event_t*)event)->window, "gravity", event_dir, env);
+
+				break;
+			case XCB_RESIZE_REQUEST:
+				xmpl_event_trigger(conn, root, ((xcb_resize_request_event_t*)event)->window, "window-resize", event_dir, env);
+
+				break;
+			case XCB_CIRCULATE_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_circulate_notify_event_t*)event)->window, "restack-finish", event_dir, env);
+
+				break;
+			case XCB_CIRCULATE_REQUEST:
+				xmpl_event_trigger(conn, root, ((xcb_circulate_request_event_t*)event)->window, "restack-start", event_dir, env);
+
+				break;
+			case XCB_PROPERTY_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_property_notify_event_t*)event)->window, "property-change", event_dir, env);
+
+				break;
+			case XCB_SELECTION_CLEAR:
+				xmpl_event_trigger(conn, root, ((xcb_selection_clear_event_t*)event)->owner, "select-clear", event_dir, env);
+
+				break;
+			case XCB_SELECTION_REQUEST:
+				xmpl_event_trigger(conn, root, ((xcb_selection_request_event_t*)event)->owner, "select-start", event_dir, env);
+
+				break;
+			case XCB_SELECTION_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_selection_notify_event_t*)event)->requestor, "select-end", event_dir, env);
+
+				break;
+			case XCB_COLORMAP_NOTIFY:
+				xmpl_event_trigger(conn, root, ((xcb_colormap_notify_event_t*)event)->window, "colormap-change", event_dir, env);
+
+				break;
+			case XCB_CLIENT_MESSAGE:
+				xmpl_event_trigger(conn, root, ((xcb_client_message_event_t*)event)->window, "client-message", event_dir, env);
+
+				break;
+			case XCB_MAPPING_NOTIFY:
+				xmpl_event_trigger(conn, root, 0, "window-remap", event_dir, env);
+
+				break;
+			default:
+				sprintf(event_name, "unknow-event-%d", event->response_type);
+
+				xmpl_event_trigger(conn, root, 0, event_name, event_dir, env);
+		}
+
+		xmpl_free(event);
 	}
 }
 
-/*
+/**
  * Test Whether A Configure Event Should Happen
  */
 bool
@@ -659,260 +944,12 @@ xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
 }
 
 /**
- * Register events and run an Event Loop
- */
-void
-xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask)
-{
-	char *event_name = (char *) malloc(32);
-	xcb_generic_event_t *event;
-
-	xmpl_event_register(conn, root, mask);
-
-	xmpl_event_trigger(conn, root, root, "watch-start", event_dir);
-
-	while (conn) {
-		event = xcb_wait_for_event(conn);
-
-		switch (event->response_type & ~0x80) {
-			case XCB_KEY_PRESS:
-				xmpl_event_trigger(conn, root, ((xcb_key_press_event_t*)event)->event, "key-down", event_dir);
-
-				break;
-			case XCB_KEY_RELEASE:
-				xmpl_event_trigger(conn, root, ((xcb_key_release_event_t*)event)->event, "key-up", event_dir);
-
-				break;
-			case XCB_BUTTON_PRESS:
-				;xcb_button_press_event_t *press_event;
-
-				press_event = (xcb_button_press_event_t *) event;
-
-				switch (press_event->detail) {
-					case 1:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-down-left", event_dir);
-
-						break;
-					case 2:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-down-middle", event_dir);
-
-						break;
-					case 3:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-down-right", event_dir);
-
-						break;
-					case 4:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-scroll-up", event_dir);
-
-						break;
-					case 5:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-scroll-down", event_dir);
-
-						break;
-					case 6:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-scroll-left", event_dir);
-
-						break;
-					case 7:
-						xmpl_event_trigger(conn, root, press_event->event, "mouse-scroll-right", event_dir);
-
-						break;
-					default:
-						sprintf(event_name, "mouse-down-button-%d", press_event->detail);
-
-						xmpl_event_trigger(conn, root, press_event->event, event_name, event_dir);
-				}
-
-				break;
-			case XCB_BUTTON_RELEASE:
-				;xcb_button_release_event_t *release_event;
-
-				release_event = (xcb_button_release_event_t *) event;
-
-				switch (release_event->detail) {
-					case 1:
-						xmpl_event_trigger(conn, root, release_event->event, "mouse-up-left", event_dir);
-
-						break;
-					case 2:
-						xmpl_event_trigger(conn, root, release_event->event, "mouse-up-middle", event_dir);
-
-						break;
-					case 3:
-						xmpl_event_trigger(conn, root, release_event->event, "mouse-up-right", event_dir);
-
-						break;
-					case 4:
-					case 5:
-					case 6:
-					case 7:
-						//avoid release for scroll buttons
-
-						break;
-					default:
-						sprintf(event_name, "mouse-up-button-%d", release_event->detail);
-
-						xmpl_event_trigger(conn, root, release_event->event, event_name, event_dir);
-				}
-
-
-				break;
-			case XCB_MOTION_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_motion_notify_event_t*)event)->event, "mouse-move", event_dir);
-
-				break;
-			case XCB_ENTER_NOTIFY:
-				if (xmpl_event_notify_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "window-enter", event_dir);
-				}
-
-				break;
-			case XCB_LEAVE_NOTIFY:
-				if (xmpl_event_notify_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_enter_notify_event_t*)event)->event, "window-leave", event_dir);
-				}
-
-				break;
-			case XCB_FOCUS_IN:
-				xmpl_event_trigger(conn, root, ((xcb_focus_in_event_t*)event)->event, "window-focus", event_dir);
-
-				break;
-			case XCB_FOCUS_OUT:
-				xmpl_event_trigger(conn, root, ((xcb_focus_in_event_t*)event)->event, "window-blur", event_dir);
-
-				break;
-			case XCB_KEYMAP_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_button_release_event_t*)event)->event, "keymap-notify", event_dir);
-
-				break;
-			case XCB_EXPOSE:
-				xmpl_event_trigger(conn, root, ((xcb_expose_event_t*)event)->window, "window-expose", event_dir);
-
-				break;
-			case XCB_GRAPHICS_EXPOSURE:
-				xmpl_event_trigger(conn, root, ((xcb_expose_event_t*)event)->window, "graphics-exposure", event_dir);
-
-				break;
-			case XCB_NO_EXPOSURE:
-				xmpl_event_trigger(conn, root, ((xcb_expose_event_t*)event)->window, "no-exposure", event_dir);
-
-				break;
-			case XCB_VISIBILITY_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_visibility_notify_event_t*)event)->window, "window-visibility", event_dir);
-
-				break;
-			case XCB_CREATE_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_create_notify_event_t*)event)->window, "window-create", event_dir);
-
-				xmpl_event_register(conn, ((xcb_create_notify_event_t*)event)->window, mask);
-
-				break;
-			case XCB_DESTROY_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_create_notify_event_t*)event)->window, "window-destroy", event_dir);
-
-				break;
-			case XCB_UNMAP_NOTIFY:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_unmap_notify_event_t*)event)->window, "window-hide", event_dir);
-				}
-
-				break;
-			case XCB_MAP_NOTIFY:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_map_notify_event_t*)event)->window, "window-show", event_dir);
-				}
-
-				break;
-			case XCB_MAP_REQUEST:
-				;xcb_map_request_event_t *map_event = (xcb_map_request_event_t *) event;
-
-				xmpl_event_trigger(conn, root, map_event->window, "window-map", event_dir);
-				xcb_map_window(conn,  map_event->window);
-
-				break;
-			case XCB_REPARENT_NOTIFY:
-				;xcb_reparent_notify_event_t *xreparent = (xcb_reparent_notify_event_t *) event;
-
-				if (xreparent->parent == root) {
-					xmpl_event_trigger(conn, root, xreparent->window, "reparent-incoming", event_dir);
-				} else {
-					xmpl_event_trigger(conn, root, xreparent->window, "reparent-outgoing", event_dir);
-				}
-
-				break;
-			case XCB_CONFIGURE_NOTIFY:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_configure_notify_event_t*)event)->window, "config-finish", event_dir);
-				}
-
-				break;
-			case XCB_CONFIGURE_REQUEST:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_configure_request_event_t*)event)->window, "config-begin", event_dir);
-				}
-
-				break;
-			case XCB_GRAVITY_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_gravity_notify_event_t*)event)->window, "gravity", event_dir);
-
-				break;
-			case XCB_RESIZE_REQUEST:
-				xmpl_event_trigger(conn, root, ((xcb_resize_request_event_t*)event)->window, "window-resize", event_dir);
-
-				break;
-			case XCB_CIRCULATE_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_circulate_notify_event_t*)event)->window, "restack-finish", event_dir);
-
-				break;
-			case XCB_CIRCULATE_REQUEST:
-				xmpl_event_trigger(conn, root, ((xcb_circulate_request_event_t*)event)->window, "restack-start", event_dir);
-
-				break;
-			case XCB_PROPERTY_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_property_notify_event_t*)event)->window, "property-change", event_dir);
-
-				break;
-			case XCB_SELECTION_CLEAR:
-				xmpl_event_trigger(conn, root, ((xcb_selection_clear_event_t*)event)->owner, "select-clear", event_dir);
-
-				break;
-			case XCB_SELECTION_REQUEST:
-				xmpl_event_trigger(conn, root, ((xcb_selection_request_event_t*)event)->owner, "select-start", event_dir);
-
-				break;
-			case XCB_SELECTION_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_selection_notify_event_t*)event)->requestor, "select-end", event_dir);
-
-				break;
-			case XCB_COLORMAP_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_colormap_notify_event_t*)event)->window, "colormap-change", event_dir);
-
-				break;
-			case XCB_CLIENT_MESSAGE:
-				xmpl_event_trigger(conn, root, ((xcb_client_message_event_t*)event)->window, "client-message", event_dir);
-
-				break;
-			case XCB_MAPPING_NOTIFY:
-				xmpl_event_trigger(conn, root, 0, "window-remap", event_dir);
-
-				break;
-			default:
-				sprintf(event_name, "unknow-event-%d", event->response_type);
-
-				xmpl_event_trigger(conn, root, 0, event_name, event_dir);
-		}
-
-		xmpl_free(event);
-	}
-}
-
-/**
  * Trigger an Event
  */
 bool
-xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, char *event_name, char *event_dir)
+xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, char *event_name, char *event_dir, char *env)
 {
-	char *event_path = (char *) malloc(1 + strlen(event_name) + strlen(event_dir? event_dir : "~/.events"));
+	char *event_path = (char *) malloc(2 + strlen(event_name) + strlen(event_dir? event_dir : "~/.events"));
 	char *event_cmd;
 	DIR *dir;
 	struct stat statbuf;
@@ -941,7 +978,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 			return false;
 		}
 
-		xmpl_event_spawn(root, win, event_path, 15);
+		xmpl_event_spawn(root, win, event_path, 15, env);
 
 		return true;
 	}
@@ -955,7 +992,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
 
 		sprintf(event_cmd, "%s/%s", event_path, entry->d_name);
 
-		xmpl_event_spawn(root, win, event_cmd, 5);
+		xmpl_event_spawn(root, win, event_cmd, 5, env);
 	}
 
 	closedir(dir);
@@ -967,7 +1004,7 @@ xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, 
  * Event Spawn
  */
 void
-xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeout)
+xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeout, char *env)
 {
 	pid_t pid;
 	struct stat statbuf;
@@ -1006,7 +1043,7 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeou
 	}
 
 	// run program
-	execve(cmd_path, cmd, xmpl_event_env(root, win));
+	execve(cmd_path, cmd, xmpl_event_environment(root, win, env));
 
 	// report error
 	fprintf(stderr, "execution error: %s\n", cmd_path);
@@ -1018,20 +1055,25 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeou
  * Event Environment
  */
 char **
-xmpl_event_env(xcb_window_t root, xcb_window_t win)
+xmpl_event_environment(xcb_window_t root, xcb_window_t win, char *env)
 {
 	char *x_display = getenv("DISPLAY");
 	char *events_dir = getenv("EVENTS");
 	char *path_dir = getenv("PATH");
 	char *cmd_dir = getenv("COMMANDS");
-	char *env[6];
+	char *settings[8];
+	int i = 0;
 
-	env[0] = (char *) malloc(32);
+	settings[i] = (char *) malloc(15);
+
+	sprintf(settings[i++], "ROOT=0x%08x", root);
+
+	settings[i] = (char *) malloc(17);
 
 	if (win) {
-		sprintf(env[0], "WINDOW=0x%08x", win);
+		sprintf(settings[i++], "WINDOW=0x%08x", win);
 	} else {
-		sprintf(env[0], "WINDOW=");
+		sprintf(settings[i++], "WINDOW=");
 	}
 
 	if (!events_dir) {
@@ -1039,37 +1081,38 @@ xmpl_event_env(xcb_window_t root, xcb_window_t win)
 		events_dir = "~/.events";
 	}
 
-	env[1] = (char *) malloc(8 + strlen(events_dir));
+	settings[i] = (char *) malloc(8 + strlen(events_dir));
 
-	sprintf(env[1], "EVENTS=%s", events_dir);
+	sprintf(settings[i++], "EVENTS=%s", events_dir);
 
 	if (!cmd_dir) {
 		cmd_dir = (char *) malloc(2);
 		cmd_dir = ".";
 	}
 
-	env[2] = (char *) malloc(10 + strlen(cmd_dir));
+	settings[i] = (char *) malloc(10 + strlen(cmd_dir));
 
-	sprintf(env[2], "COMMANDS=%s", cmd_dir);
+	sprintf(settings[i++], "COMMANDS=%s", cmd_dir);
 
 	if (!path_dir) {
 		path_dir = (char *) malloc(2);
 		path_dir = ".";
 	}
 
-	env[3] = (char *) malloc(6 + strlen(cmd_dir) + strlen(path_dir));
+	settings[i] = (char *) malloc(6 + strlen(cmd_dir) + strlen(path_dir));
 
-	sprintf(env[3], "PATH=%s:%s", path_dir, cmd_dir);
+	sprintf(settings[i++], "PATH=%s:%s", path_dir, cmd_dir);
 
-	env[4] = (char *) malloc(8 + strlen(x_display));
+	settings[i] = (char *) malloc(8 + strlen(x_display));
 
-	sprintf(env[4], "DISPLAY=%s", x_display);
+	sprintf(settings[i++], "DISPLAY=%s", x_display);
 
-	env[5] = NULL;
+	settings[i] = env;
+	settings[++i] = NULL;
 
-	char **ret = malloc(sizeof(env));
+	char **ret = malloc(sizeof(settings));
 
-	memcpy(ret, env, sizeof(env));
+	memcpy(ret, settings, sizeof(settings));
 
 	return ret;
 }

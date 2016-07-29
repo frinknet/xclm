@@ -51,7 +51,7 @@ xcmd_windows (3, "event-dir") {
 				case XCB_REPARENT_NOTIFY:
 					xreparent = (xcb_reparent_notify_event_t *) xevent;
 
-					xmpl_event_trigger(xcmd_conn, xcmd_win, xreparent->window, "reparent-notify", event_dir);
+					xmpl_event_trigger(xcmd_conn, xcmd_win, xreparent->window, "reparent-notify", event_dir, NULL);
 
 					//switch (xreparent->parent) {
 					//}
@@ -62,19 +62,19 @@ xcmd_windows (3, "event-dir") {
 
 					switch (xbutton->detail) {
 						case 4:
-							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-up", event_dir);
+							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-up", event_dir, NULL);
 
 							break;
 						case 5:
-							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-down", event_dir);
+							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-down", event_dir, NULL);
 
 							break;
 						case 6:
-							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-left", event_dir);
+							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-left", event_dir, NULL);
 
 							break;
 						case 7:
-							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-right", event_dir);
+							xmpl_event_trigger(xcmd_conn, xcmd_win, xbutton->event, "mouse-scroll-right", event_dir, NULL);
 
 							break;
 					}

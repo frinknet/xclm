@@ -1,3 +1,7 @@
+#binaries
+*
+!*.*
+
 # Object files
 *.o
 *.ko
@@ -35,6 +39,3 @@
 #vim files
 *~
 
-*
-!/**/
-!(*.*)

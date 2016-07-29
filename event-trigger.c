@@ -4,6 +4,7 @@
 
 xcmd_call (2, "event-name [..wid]") {
 	char *event_dir = getenv("EVENTS");
+	xcb_window_t root = strtoul(getenv("ROOT"), NULL, 16);
 	char *event_name = xcmd_next;
 	xcb_screen_t *screen;
 
@@ -13,11 +14,13 @@ xcmd_call (2, "event-name [..wid]") {
 
 	printf("event-dir %s\n", event_dir);
 
+	root = root? root : screen->root;
+
 	if (xcmd_args < 3) {
-		xmpl_event_trigger(xcmd_conn, screen->root, 0, event_name, event_dir);
+		xmpl_event_trigger(xcmd_conn, root, 0, event_name, event_dir, NULL);
 
 		xcmd_return(0);
 	}
 
-	xcmd_win_exec(xmpl_event_trigger(xcmd_conn, screen->root, xcmd_win, event_name, event_dir));
+	xcmd_win_exec(xmpl_event_trigger(xcmd_conn, root, xcmd_win, event_name, event_dir, NULL));
 }

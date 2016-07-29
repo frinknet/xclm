@@ -5,5 +5,11 @@
 xcmd_windows (3, "atom-name") {
 	char *atom_name = xcmd_next;
 
-	xcmd_win_exec(printf("%s\n", (char *) xmpl_window_get_atom(xcmd_conn, xcmd_win, atom_name, XCB_ATOM_STRING)));
+	setbuf(stdout, NULL);
+
+	xcmd_win_loop {
+		printf("%s\n", (char *) xmpl_window_get_atom(xcmd_conn, xcmd_win, atom_name, XCB_ATOM_STRING));
+	}
+
+	xcmd_exit(0);
 }

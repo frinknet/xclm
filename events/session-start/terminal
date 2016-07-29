@@ -1,5 +1,0 @@
-#!/bin/bash
-
-urxvt -e event-watch events $(window-root) &
-#chromium &1>/dev/null &2>/dev/null &
-

@@ -2,10 +2,6 @@ include config.mk
 
 HDR = xmpl.h xcmd.h xclm.h
 SRC = \
-	event-watch.c \
-	event-trigger.c \
-	event-test.c \
-	window-new.c \
 	window-get.c \
 	window-set.c \
 	window-command.c \
@@ -55,8 +51,13 @@ SRC = \
 	window-is-valid.c \
 	window-is-bordered.c \
 	window-is-focussed.c \
+	window-is-parent.c \
 	window-root.c \
-	window-current.c
+	window-current.c \
+	window-new.c \
+	event-watch.c \
+	event-trigger.c \
+	event-test.c
 
 OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)
