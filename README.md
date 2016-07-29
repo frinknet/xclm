@@ -1,5 +1,8 @@
-XCLM! X Command Line Manipulation Suite
-=========
+XCLM!
+=====
+
+X Command Line Manipulation Suite
+---------------------------------
 
 XCLM! is the building blocks of a scripted window manager. They can be used in
 conjunction with XCB Watch to script complex window interactions. You can use XCB
