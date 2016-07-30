@@ -593,6 +593,142 @@ xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
 }
 
 /**
+ * Test Whether A Configure Event Should Happen
+ */
+static void
+xmpl_event_configure_request(xcb_connection_t *conn, xcb_configure_request_event_t *event)
+{
+	u_int16_t mask = 0;
+	u_int32_t vals[7];
+	short i = 0;
+
+	if (event->value_mask & XCB_CONFIG_WINDOW_X) {
+		mask |= XCB_CONFIG_WINDOW_X;
+		vals[i++] = event->x;
+	}
+
+	if (event->value_mask & XCB_CONFIG_WINDOW_Y) {
+		mask |= XCB_CONFIG_WINDOW_Y;
+		vals[i++] = event->y;
+	}
+
+	if (event->value_mask & XCB_CONFIG_WINDOW_WIDTH) {
+		mask |= XCB_CONFIG_WINDOW_WIDTH;
+		vals[i++] = event->width;
+	}
+
+	if (event->value_mask & XCB_CONFIG_WINDOW_HEIGHT) {
+		mask |= XCB_CONFIG_WINDOW_HEIGHT;
+		vals[i++] = event->height;
+	}
+
+	if (event->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH) {
+		mask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
+		vals[i++] = event->border_width;
+	}
+
+	if (event->value_mask & XCB_CONFIG_WINDOW_SIBLING) {
+		mask |= XCB_CONFIG_WINDOW_SIBLING;
+		vals[i++] = event->sibling;
+	}
+
+	if (event->value_mask & XCB_CONFIG_WINDOW_STACK_MODE) {
+		mask |= XCB_CONFIG_WINDOW_STACK_MODE;
+		vals[i++] = event->stack_mode;
+	}
+
+	xcb_configure_window(conn, event->window, mask,vals);
+	xcb_flush(conn);
+}
+
+/*
+ * Test Whether A Notify Event Should Happen
+ */
+static bool
+xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
+{
+	xcb_enter_notify_event_t *notify;
+
+	notify = (xcb_enter_notify_event_t*)event;
+
+	switch (notify->mode) {
+	case XCB_NOTIFY_MODE_NORMAL:
+	case XCB_NOTIFY_MODE_UNGRAB:
+		if (notify->detail != XCB_NOTIFY_DETAIL_INFERIOR) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Event Environment
+ */
+static char **
+xmpl_event_environment(xcb_window_t root, xcb_window_t win, char *env)
+{
+	char *x_display = getenv("DISPLAY");
+	char *events_dir = getenv("EVENTS");
+	char *path_dir = getenv("PATH");
+	char *cmd_dir = getenv("COMMANDS");
+	char *settings[8];
+	int i = 0;
+
+	settings[i] = (char *) malloc(15);
+
+	sprintf(settings[i++], "ROOT=0x%08x", root);
+
+	settings[i] = (char *) malloc(17);
+
+	if (win) {
+		sprintf(settings[i++], "WINDOW=0x%08x", win);
+	} else {
+		sprintf(settings[i++], "WINDOW=");
+	}
+
+	if (!events_dir) {
+		events_dir = (char *) malloc(10);
+		events_dir = "~/.events";
+	}
+
+	settings[i] = (char *) malloc(8 + strlen(events_dir));
+
+	sprintf(settings[i++], "EVENTS=%s", events_dir);
+
+	if (!cmd_dir) {
+		cmd_dir = (char *) malloc(2);
+		cmd_dir = ".";
+	}
+
+	settings[i] = (char *) malloc(10 + strlen(cmd_dir));
+
+	sprintf(settings[i++], "COMMANDS=%s", cmd_dir);
+
+	if (!path_dir) {
+		path_dir = (char *) malloc(2);
+		path_dir = ".";
+	}
+
+	settings[i] = (char *) malloc(6 + strlen(cmd_dir) + strlen(path_dir));
+
+	sprintf(settings[i++], "PATH=%s:%s", path_dir, cmd_dir);
+
+	settings[i] = (char *) malloc(8 + strlen(x_display));
+
+	sprintf(settings[i++], "DISPLAY=%s", x_display);
+
+	settings[i] = env;
+	settings[++i] = NULL;
+
+	char **ret = malloc(sizeof(settings));
+
+	memcpy(ret, settings, sizeof(settings));
+
+	return ret;
+}
+
+/**
  * Register Events
  */
 void
@@ -679,6 +815,28 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 		switch (event->response_type & ~0x80) {
 			case 0:
+				break;
+			case XCB_CONFIGURE_REQUEST:
+				xmpl_event_configure_request(conn, (xcb_configure_request_event_t*) event);
+
+				break;
+			case XCB_CIRCULATE_REQUEST:
+				xmpl_event_trigger(conn, root, ((xcb_circulate_request_event_t*)event)->window, "restack-start", event_dir, env);
+
+				break;
+			case XCB_RESIZE_REQUEST:
+				xmpl_event_trigger(conn, root, ((xcb_resize_request_event_t*)event)->window, "WINDOW-RESIZE", event_dir, env);
+
+				break;
+			case XCB_SELECTION_REQUEST:
+				xmpl_event_trigger(conn, root, ((xcb_selection_request_event_t*)event)->owner, "select-start", event_dir, env);
+
+				break;
+			case XCB_MAP_REQUEST:
+				xcb_map_window(conn, ((xcb_map_notify_event_t*)event)->window);
+				xcb_flush(conn);
+				xmpl_event_register(conn, ((xcb_map_notify_event_t*)event)->window, mask);
+
 				break;
 			case XCB_KEY_PRESS:
 				xmpl_event_trigger(conn, root, ((xcb_key_press_event_t*)event)->event, "key-down", event_dir, env);
@@ -812,20 +970,10 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 				break;
 			case XCB_UNMAP_NOTIFY:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_unmap_notify_event_t*)event)->window, "window-hide", event_dir, env);
-				}
+				xmpl_event_trigger(conn, root, ((xcb_unmap_notify_event_t*)event)->window, "window-hide", event_dir, env);
 
 				break;
 			case XCB_MAP_NOTIFY:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_map_notify_event_t*)event)->window, "window-show", event_dir, env);
-				}
-
-				break;
-			case XCB_MAP_REQUEST:
-				xcb_map_window(conn, ((xcb_map_notify_event_t*)event)->window);
-				xmpl_event_register(conn, ((xcb_map_notify_event_t*)event)->window, mask);
 				xmpl_event_trigger(conn, root, ((xcb_map_notify_event_t*)event)->window, "window-show", event_dir, env);
 
 				break;
@@ -842,31 +990,15 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 				break;
 			case XCB_CONFIGURE_NOTIFY:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_configure_notify_event_t*)event)->window, "config-finish", event_dir, env);
-				}
-
-				break;
-			case XCB_CONFIGURE_REQUEST:
-				if (xmpl_event_configure_valid(conn, event)) {
-					xmpl_event_trigger(conn, root, ((xcb_configure_request_event_t*)event)->window, "config-begin", event_dir, env);
-				}
+				xmpl_event_trigger(conn, root, ((xcb_configure_notify_event_t*)event)->window, "config-finish", event_dir, env);
 
 				break;
 			case XCB_GRAVITY_NOTIFY:
 				xmpl_event_trigger(conn, root, ((xcb_gravity_notify_event_t*)event)->window, "gravity", event_dir, env);
 
 				break;
-			case XCB_RESIZE_REQUEST:
-				xmpl_event_trigger(conn, root, ((xcb_resize_request_event_t*)event)->window, "window-resize", event_dir, env);
-
-				break;
 			case XCB_CIRCULATE_NOTIFY:
 				xmpl_event_trigger(conn, root, ((xcb_circulate_notify_event_t*)event)->window, "restack-finish", event_dir, env);
-
-				break;
-			case XCB_CIRCULATE_REQUEST:
-				xmpl_event_trigger(conn, root, ((xcb_circulate_request_event_t*)event)->window, "restack-start", event_dir, env);
 
 				break;
 			case XCB_PROPERTY_NOTIFY:
@@ -877,10 +1009,6 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 				break;
 			case XCB_SELECTION_CLEAR:
 				xmpl_event_trigger(conn, root, ((xcb_selection_clear_event_t*)event)->owner, "select-clear", event_dir, env);
-
-				break;
-			case XCB_SELECTION_REQUEST:
-				xmpl_event_trigger(conn, root, ((xcb_selection_request_event_t*)event)->owner, "select-start", event_dir, env);
 
 				break;
 			case XCB_SELECTION_NOTIFY:
@@ -907,43 +1035,6 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 		xmpl_free(event);
 	}
-}
-
-/**
- * Test Whether A Configure Event Should Happen
- */
-bool
-xmpl_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
-{
-	xcb_configure_notify_event_t *config;
-	xcb_screen_t *screen;
-
-	xmpl_screen_init(conn, &screen);
-
-	config = (xcb_configure_notify_event_t*)event;
-
-	return (config->window == screen->root);
-}
-
-/*
- * Test Whether A Notify Event Should Happen
- */
-bool
-xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t *event)
-{
-	xcb_enter_notify_event_t *notify;
-
-	notify = (xcb_enter_notify_event_t*)event;
-
-	switch (notify->mode) {
-	case XCB_NOTIFY_MODE_NORMAL:
-	case XCB_NOTIFY_MODE_UNGRAB:
-		if (notify->detail != XCB_NOTIFY_DETAIL_INFERIOR) {
-			return true;
-		}
-	}
-
-	return false;
 }
 
 /**
@@ -1052,72 +1143,6 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeou
 	fprintf(stderr, "execution error: %s\n", cmd_path);
 
 	exit(1);
-}
-
-/**
- * Event Environment
- */
-char **
-xmpl_event_environment(xcb_window_t root, xcb_window_t win, char *env)
-{
-	char *x_display = getenv("DISPLAY");
-	char *events_dir = getenv("EVENTS");
-	char *path_dir = getenv("PATH");
-	char *cmd_dir = getenv("COMMANDS");
-	char *settings[8];
-	int i = 0;
-
-	settings[i] = (char *) malloc(15);
-
-	sprintf(settings[i++], "ROOT=0x%08x", root);
-
-	settings[i] = (char *) malloc(17);
-
-	if (win) {
-		sprintf(settings[i++], "WINDOW=0x%08x", win);
-	} else {
-		sprintf(settings[i++], "WINDOW=");
-	}
-
-	if (!events_dir) {
-		events_dir = (char *) malloc(10);
-		events_dir = "~/.events";
-	}
-
-	settings[i] = (char *) malloc(8 + strlen(events_dir));
-
-	sprintf(settings[i++], "EVENTS=%s", events_dir);
-
-	if (!cmd_dir) {
-		cmd_dir = (char *) malloc(2);
-		cmd_dir = ".";
-	}
-
-	settings[i] = (char *) malloc(10 + strlen(cmd_dir));
-
-	sprintf(settings[i++], "COMMANDS=%s", cmd_dir);
-
-	if (!path_dir) {
-		path_dir = (char *) malloc(2);
-		path_dir = ".";
-	}
-
-	settings[i] = (char *) malloc(6 + strlen(cmd_dir) + strlen(path_dir));
-
-	sprintf(settings[i++], "PATH=%s:%s", path_dir, cmd_dir);
-
-	settings[i] = (char *) malloc(8 + strlen(x_display));
-
-	sprintf(settings[i++], "DISPLAY=%s", x_display);
-
-	settings[i] = env;
-	settings[++i] = NULL;
-
-	char **ret = malloc(sizeof(settings));
-
-	memcpy(ret, settings, sizeof(settings));
-
-	return ret;
 }
 
 void

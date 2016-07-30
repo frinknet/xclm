@@ -124,12 +124,9 @@ xcb_atom_t xmpl_atom(xcb_connection_t *conn, char *atom_name);
 char *xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom_name);
 
 void xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask);
-bool xmpl_event_notify_valid(xcb_connection_t *conn, xcb_generic_event_t* event);
-bool xmpl_event_configure_valid(xcb_connection_t *conn, xcb_generic_event_t *event);
 void xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask);
 bool xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, char *event_name, char *event_dir, char *env);
 void xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeout, char *env);
-char **xmpl_event_environment(xcb_window_t root, xcb_window_t win, char *env);
 
 void xmpl_pointer_center(xcb_connection_t *conn, xcb_window_t win);
 void xmpl_pointer_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y);
