@@ -11,8 +11,8 @@ xcmd_windows (3, "event-dir") {
 		//| XMPL_EVENT_MASK_MOTION
 		//| XMPL_EVENT_MASK_BUTTONS
 		//| XMPL_EVENT_MASK_KEYS
-		| XMPL_EVENT_MASK_EXPOSURE
-		//| XMPL_EVENT_MASK_PROPERTIES
+		//| XMPL_EVENT_MASK_EXPOSURE
+		| XMPL_EVENT_MASK_PROPERTIES
 		;
 
 	xcmd_win_exec(xmpl_event_watch(xcmd_conn, xcmd_win, event_dir, mask));

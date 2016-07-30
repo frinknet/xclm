@@ -8,7 +8,7 @@ xcmd_windows (3, "command") {
 		xmpl_window_list_children(xcmd_conn, xcmd_win, &children);
 
 		while((win = *children++)) {
-			if (!strcmp(command, xmpl_window_get_command(xcmd_conn, win))) {
+			if (!strcmp(command, xmpl_window_command(xcmd_conn, win))) {
 				printf("0x%08x ", win);
 			}
 		}

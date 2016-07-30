@@ -3,19 +3,10 @@
 #include "xcmd.h"
 
 xcmd_windows (6, "x y width height") {
-	int x, y, width, height;
-	xcb_window_t win;
+	int x = atoi(*++argv);
+	int y = atoi(*++argv);
+	int width = atoi(*++argv);
+	int height = atoi(*++argv);
 
-	x = atoi(*++argv);
-	y = atoi(*++argv);
-	width = atoi(*++argv);
-	height = atoi(*++argv);
-
-	xcmd_loop {
-		win = strtoul(xcmd_prop, NULL, 16);
-
-		xmpl_window_set_geometry(xcmd_conn, win, x, y, width, height);
-	}
-
-	xcmd_exit(0);
+	xcmd_win_exec(xmpl_window_warp(xcmd_conn, xcmd_win, x, y, width, height));
 }

@@ -184,7 +184,7 @@ xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
  * Get Name for Window
  */
 char *
-xmpl_window_get_name(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_name(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_NAME, XCB_ATOM_STRING);
 }
@@ -193,7 +193,7 @@ xmpl_window_get_name(xcb_connection_t *conn, xcb_window_t win)
  * Get Class for Window
  */
 char *
-xmpl_window_get_class(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_class(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING);
 }
@@ -202,7 +202,7 @@ xmpl_window_get_class(xcb_connection_t *conn, xcb_window_t win)
  * Get Command for Window
  */
 char *
-xmpl_window_get_command(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_command(xcb_connection_t *conn, xcb_window_t win)
 {
 	return xmpl_window_get_property(conn, win, XCB_ATOM_WM_COMMAND, XCB_ATOM_STRING);
 }
@@ -211,7 +211,7 @@ xmpl_window_get_command(xcb_connection_t *conn, xcb_window_t win)
  * Get Type for Window
  */
 char *
-xmpl_window_get_type(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_type(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_atom_t *atom;
 
@@ -238,11 +238,11 @@ xmpl_window_set_ignore(xcb_connection_t *conn, xcb_window_t win, int override)
  * Set Background for Window
  */
 void
-xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color)
+xmpl_window_background(xcb_connection_t *conn, xcb_window_t win, uint32_t color)
 {
 	xcb_change_window_attributes(conn, win, XCB_CW_BACK_PIXEL, (uint32_t[]){ color });
 
-	xcb_get_geometry_reply_t *geom = xmpl_window_get_geometry(conn, win);
+	xcb_get_geometry_reply_t *geom = xmpl_window_geometry(conn, win);
 	xcb_clear_area(conn, 1, win, 0, 0, geom->width, geom->height);
 
 	xmpl_free(geom);
@@ -253,7 +253,7 @@ xmpl_window_set_background(xcb_connection_t *conn, xcb_window_t win, uint32_t co
  * Set Border for Window
  */
 void
-xmpl_window_set_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color)
+xmpl_window_border(xcb_connection_t *conn, xcb_window_t win, uint32_t size, uint32_t color)
 {
 	xcb_change_window_attributes(conn, win, XCB_CW_BORDER_PIXEL, (uint32_t[]){ color });
 	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_BORDER_WIDTH, (uint32_t[]){ size });
@@ -275,7 +275,7 @@ xmpl_window_set_stack(xcb_connection_t *conn, xcb_window_t win, uint32_t stack)
  * Set Size for Window
  */
 void
-xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int w, int h)
+xmpl_window_resize(xcb_connection_t *conn, xcb_window_t win, int w, int h)
 {
 	xcb_configure_window(
 		conn, win,
@@ -290,7 +290,7 @@ xmpl_window_set_size(xcb_connection_t *conn, xcb_window_t win, int w, int h)
  * Set Position for Window
  */
 void
-xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y)
+xmpl_window_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
 	xcb_configure_window(
 		conn, win,
@@ -305,7 +305,7 @@ xmpl_window_set_position(xcb_connection_t *conn, xcb_window_t win, int x, int y)
  * Set Geometry for Window
  */
 void
-xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y, int w, int h)
+xmpl_window_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int w, int h)
 {
 	xcb_configure_window(
 		conn, win,
@@ -323,7 +323,7 @@ xmpl_window_set_geometry(xcb_connection_t *conn, xcb_window_t win, int x, int y,
  * Get Geometry for Window
  */
 xcb_get_geometry_reply_t *
-xmpl_window_get_geometry(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_geometry(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_get_geometry_cookie_t cookie;
 	xcb_get_geometry_reply_t *reply;
@@ -364,7 +364,7 @@ int
 xmpl_window_is_bordered(xcb_connection_t *conn, xcb_window_t win)
 {
 	int border;
-	xcb_get_geometry_reply_t *geom = xmpl_window_get_geometry(conn, win);
+	xcb_get_geometry_reply_t *geom = xmpl_window_geometry(conn, win);
 
 	if (geom == NULL) {
 		return 0;
@@ -454,7 +454,7 @@ xmpl_window_list_children(xcb_connection_t *conn, xcb_window_t win, xcb_window_t
  * Get Window Parent
  */
 xcb_window_t
-xmpl_window_get_parent(xcb_connection_t *conn, xcb_window_t win)
+xmpl_window_parent(xcb_connection_t *conn, xcb_window_t win)
 {
 	xcb_window_t parent;
 	xcb_query_tree_cookie_t cookie;
@@ -513,7 +513,7 @@ xmpl_window_create(xcb_connection_t *conn, xcb_window_t parent, int x, int y, in
  * Get Current Window
  */
 xcb_window_t
-xmpl_window_get_current(xcb_connection_t *conn)
+xmpl_window_current(xcb_connection_t *conn)
 {
 	xcb_window_t win = 0;
 
@@ -824,8 +824,9 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 				break;
 			case XCB_MAP_REQUEST:
-				xmpl_event_register(conn, ((xcb_create_notify_event_t*)event)->window, mask);
-				xcb_map_window(conn,  ((xcb_create_notify_event_t*)event)->window);
+				xcb_map_window(conn, ((xcb_map_notify_event_t*)event)->window);
+				xmpl_event_register(conn, ((xcb_map_notify_event_t*)event)->window, mask);
+				xmpl_event_trigger(conn, root, ((xcb_map_notify_event_t*)event)->window, "window-show", event_dir, env);
 
 				break;
 			case XCB_REPARENT_NOTIFY:
@@ -869,7 +870,9 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 
 				break;
 			case XCB_PROPERTY_NOTIFY:
-				xmpl_event_trigger(conn, root, ((xcb_property_notify_event_t*)event)->window, "property-change", event_dir, env);
+				sprintf(event_name, "property/%s", xmpl_atom_name(conn, ((xcb_property_notify_event_t*)event)->atom));
+
+				xmpl_event_trigger(conn, root, ((xcb_property_notify_event_t*)event)->window, event_name, event_dir, env);
 
 				break;
 			case XCB_SELECTION_CLEAR:
@@ -1123,7 +1126,7 @@ xmpl_pointer_center(xcb_connection_t *conn, xcb_window_t win)
 	uint32_t values[1];
 	xcb_get_geometry_reply_t *geom;
 
-	geom = xmpl_window_get_geometry(conn, win);
+	geom = xmpl_window_geometry(conn, win);
 
 	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0,
 			(geom->width + (geom->border_width * 2)) / 2,
