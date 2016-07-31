@@ -118,6 +118,12 @@ char *xmpl_window_class(xcb_connection_t *conn, xcb_window_t win);
 char *xmpl_window_command(xcb_connection_t *conn, xcb_window_t win);
 char *xmpl_window_type(xcb_connection_t *conn, xcb_window_t win);
 
+void xmpl_window_rename(xcb_connection_t *conn, xcb_window_t win, char *name);
+
+void xmpl_window_fullscreen(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_maximize(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_restore(xcb_connection_t *conn, xcb_window_t win);
+
 xcb_window_t xmpl_window_current(xcb_connection_t *conn);
 
 xcb_atom_t xmpl_atom(xcb_connection_t *conn, char *atom_name);

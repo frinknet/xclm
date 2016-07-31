@@ -177,7 +177,16 @@ xmpl_window_get_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t pr
 void
 xmpl_window_set_property(xcb_connection_t *conn, xcb_window_t win, xcb_atom_t prop, xcb_atom_t type, void *value)
 {
-	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, prop, type, 8, strlen(value), value);
+	int format = 8;
+
+	switch (type) {
+		case XCB_ATOM_ATOM:
+			format = 32;
+
+			break;
+	}
+
+	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, prop, type, format, strlen(value), value);
 }
 
 /**
@@ -222,6 +231,68 @@ xmpl_window_type(xcb_connection_t *conn, xcb_window_t win)
 	}
 
 	return xmpl_atom_name(conn, *atom);
+}
+
+/**
+ * Set Name for Window
+ */
+void
+xmpl_window_rename(xcb_connection_t *conn, xcb_window_t win, char *name)
+{
+	xmpl_window_set_property(conn, win, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, name);
+}
+
+/**
+ * Fullscreen Window
+ */
+void
+xmpl_window_fullscreen(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_FULLSCREEN");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Maximize Window
+ */
+void
+xmpl_window_maximize(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_VERT");
+	data[2] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_HORZ");
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Restore Window
+ */
+void
+xmpl_window_restore(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 2;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_VERT");
+	data[2] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_HORZ");
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_FULLSCREEN");
+	data[2] = xmpl_atom(conn, "_NET_WM_STATE_SHADED");
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
 }
 
 /**
@@ -535,64 +606,6 @@ xmpl_window_current(xcb_connection_t *conn)
 }
 
 /**
- * Get Atom based on Atom Name
- */
-xcb_atom_t
-xmpl_atom(xcb_connection_t *conn, char *atom_name)
-{
-	xcb_intern_atom_cookie_t cookie;
-	xcb_intern_atom_reply_t *reply;
-	xcb_atom_t atom;
-
-	if (atom_name == NULL) {
-	  return XCB_NONE;
-	}
-
-	cookie = xcb_intern_atom(conn, 0, strlen(atom_name), atom_name);
-	reply = xcb_intern_atom_reply(conn, cookie, NULL);
-
-	if (!reply) {
-		fprintf(stderr, "Could not create atom for %s\n", atom_name);
-		
-		exit(1);
-	}
-
-	atom = reply->atom;
-
-	xmpl_free(reply);
-
-	return atom;
-}
-
-/**
- * Get Atom Name based on Atom
- */
-char *
-xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
-{
-	xcb_get_atom_name_cookie_t cookie;
-	xcb_get_atom_name_reply_t *reply;
-	char *atom_name;
-
-	if (atom == XCB_NONE) {
-	  return "";
-	}
-
-	cookie = xcb_get_atom_name(conn, atom);
-	reply = xcb_get_atom_name_reply(conn, cookie, NULL);
-
-	if (!reply) {
-	  return "";
-	}
-
-	atom_name = xcb_get_atom_name_name(reply);
-
-	xmpl_free(reply);
-
-	return atom_name;
-}
-
-/**
  * Test Whether A Configure Event Should Happen
  */
 static void
@@ -838,6 +851,9 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 				xmpl_event_register(conn, ((xcb_map_notify_event_t*)event)->window, mask);
 
 				break;
+			case XCB_CLIENT_MESSAGE:
+
+				break;
 			case XCB_KEY_PRESS:
 				xmpl_event_trigger(conn, root, ((xcb_key_press_event_t*)event)->event, "key-down", event_dir, env);
 
@@ -1019,10 +1035,6 @@ xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uin
 				xmpl_event_trigger(conn, root, ((xcb_colormap_notify_event_t*)event)->window, "colormap-change", event_dir, env);
 
 				break;
-			case XCB_CLIENT_MESSAGE:
-				xmpl_event_trigger(conn, root, ((xcb_client_message_event_t*)event)->window, "client-message", event_dir, env);
-
-				break;
 			case XCB_MAPPING_NOTIFY:
 				xmpl_event_trigger(conn, root, 0, "window-remap", event_dir, env);
 
@@ -1168,4 +1180,62 @@ void
 xmpl_pointer_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
 	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0, x, y);
+}
+
+/**
+ * Get Atom based on Atom Name
+ */
+xcb_atom_t
+xmpl_atom(xcb_connection_t *conn, char *atom_name)
+{
+	xcb_intern_atom_cookie_t cookie;
+	xcb_intern_atom_reply_t *reply;
+	xcb_atom_t atom;
+
+	if (atom_name == NULL) {
+	  return XCB_NONE;
+	}
+
+	cookie = xcb_intern_atom(conn, 0, strlen(atom_name), atom_name);
+	reply = xcb_intern_atom_reply(conn, cookie, NULL);
+
+	if (!reply) {
+		fprintf(stderr, "Could not create atom for %s\n", atom_name);
+		
+		exit(1);
+	}
+
+	atom = reply->atom;
+
+	xmpl_free(reply);
+
+	return atom;
+}
+
+/**
+ * Get Atom Name based on Atom
+ */
+char *
+xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom)
+{
+	xcb_get_atom_name_cookie_t cookie;
+	xcb_get_atom_name_reply_t *reply;
+	char *atom_name;
+
+	if (atom == XCB_NONE) {
+	  return "";
+	}
+
+	cookie = xcb_get_atom_name(conn, atom);
+	reply = xcb_get_atom_name_reply(conn, cookie, NULL);
+
+	if (!reply) {
+	  return "";
+	}
+
+	atom_name = xcb_get_atom_name_name(reply);
+
+	xmpl_free(reply);
+
+	return atom_name;
 }
