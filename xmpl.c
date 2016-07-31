@@ -667,11 +667,8 @@ xmpl_window_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y, int w, 
 xcb_get_geometry_reply_t *
 xmpl_window_geometry(xcb_connection_t *conn, xcb_window_t win)
 {
-	xcb_get_geometry_cookie_t cookie;
-	xcb_get_geometry_reply_t *reply;
-
-	cookie = xcb_get_geometry(conn, win);
-	reply = xcb_get_geometry_reply(conn, cookie, NULL);
+	xcb_get_geometry_cookie_t cookie = xcb_get_geometry(conn, win);
+	xcb_get_geometry_reply_t *reply = xcb_get_geometry_reply(conn, cookie, NULL);
 
 	if (!reply) {
 		errx(1, "unable to retrieve geometry!");
@@ -1428,29 +1425,45 @@ xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeou
 	exit(1);
 }
 
+xcb_query_pointer_reply_t*
+xmpl_pointer_position(xcb_connection_t *conn, xcb_window_t win)
+{
+	xcb_query_pointer_cookie_t cookie = xcb_query_pointer(conn, win);
+	xcb_query_pointer_reply_t *reply = xcb_query_pointer_reply(conn, cookie, NULL);
+
+	if (!reply) {
+		errx(1, "unable to retrieve pointer!");
+	}
+
+	return reply;
+}
+
 void
 xmpl_pointer_center(xcb_connection_t *conn, xcb_window_t win)
 {
-	uint32_t values[1];
-	xcb_get_geometry_reply_t *geom;
-
-	geom = xmpl_window_geometry(conn, win);
+	xcb_get_geometry_reply_t *geom = xmpl_window_geometry(conn, win);
 
 	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0,
 			(geom->width + (geom->border_width * 2)) / 2,
 			(geom->height + (geom->border_width * 2)) / 2);
 
-	values[0] = XCB_STACK_MODE_ABOVE;
-
-	xcb_configure_window(conn, win, XCB_CONFIG_WINDOW_STACK_MODE, values);
-
 	xmpl_free(geom);
 }
 
 void
-xmpl_pointer_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y)
+xmpl_pointer_move(xcb_connection_t *conn, xcb_window_t win, int x, int y)
 {
 	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0, x, y);
+}
+
+void
+xmpl_pointer_nudge(xcb_connection_t *conn, xcb_window_t win, int x, int y)
+{
+	xcb_query_pointer_reply_t *pointer = xmpl_pointer_position(conn, win);
+
+	xcb_warp_pointer(conn, XCB_NONE, win, 0, 0, 0, 0, pointer->win_x + x, pointer->win_y + y);
+
+	xmpl_free(pointer);
 }
 
 /**

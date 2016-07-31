@@ -72,6 +72,10 @@ SRC = \
 	window-root.c \
 	window-current.c \
 	window-new.c \
+	pointer-center.c \
+	pointer-move.c \
+	pointer-nudge.c \
+	pointer-position.c \
 	event-watch.c \
 	event-trigger.c \
 	event-test.c
@@ -96,7 +100,7 @@ $(OBJ): $(HDR) xmpl.o
 	@echo "LD $@"
 	@$(LD) $< xmpl.o -o $@ $(LDFLAGS)
 	@echo "ST $@"
-	@$(ST) $(STFLAGS) $@
+#	@$(ST) $(STFLAGS) $@
 
 .c.o:
 	@echo "CC $<"

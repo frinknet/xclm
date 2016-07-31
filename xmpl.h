@@ -153,8 +153,10 @@ void xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir
 bool xmpl_event_trigger(xcb_connection_t *conn, xcb_window_t root, xcb_window_t win, char *event_name, char *event_dir, char *env);
 void xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int timeout, char *env);
 
+xcb_query_pointer_reply_t* xmpl_pointer_position(xcb_connection_t *conn, xcb_window_t win);
 void xmpl_pointer_center(xcb_connection_t *conn, xcb_window_t win);
-void xmpl_pointer_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y);
+void xmpl_pointer_move(xcb_connection_t *conn, xcb_window_t win, int x, int y);
+void xmpl_pointer_nudge(xcb_connection_t *conn, xcb_window_t win, int x, int y);
 
 xcb_atom_t xmpl_atom(xcb_connection_t *conn, char *atom_name);
 char *xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom_name);
