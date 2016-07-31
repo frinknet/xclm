@@ -120,9 +120,29 @@ char *xmpl_window_type(xcb_connection_t *conn, xcb_window_t win);
 
 void xmpl_window_rename(xcb_connection_t *conn, xcb_window_t win, char *name);
 
+void xmpl_window_stick(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_unstick(xcb_connection_t *conn, xcb_window_t win);
+
+void xmpl_window_pin_above(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_pin_below(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_unpin(xcb_connection_t *conn, xcb_window_t win);
+
+void xmpl_window_shade(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_unshade(xcb_connection_t *conn, xcb_window_t win);
+
 void xmpl_window_fullscreen(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_maximize_vertical(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_maximize_horizontal(xcb_connection_t *conn, xcb_window_t win);
 void xmpl_window_maximize(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_minimize(xcb_connection_t *conn, xcb_window_t win);
 void xmpl_window_restore(xcb_connection_t *conn, xcb_window_t win);
+
+void xmpl_window_taskbar_exclude(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_taskbar_include(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_pager_exclude(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_pager_include(xcb_connection_t *conn, xcb_window_t win);
+
+void xmpl_window_attention(xcb_connection_t *conn, xcb_window_t win);
 
 xcb_window_t xmpl_window_current(xcb_connection_t *conn);
 

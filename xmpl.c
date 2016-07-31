@@ -243,6 +243,118 @@ xmpl_window_rename(xcb_connection_t *conn, xcb_window_t win, char *name)
 }
 
 /**
+ * Stick Window
+ */
+void
+xmpl_window_stick(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_STICKY");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Unstick Window
+ */
+void
+xmpl_window_unstick(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 0;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_STICKY");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Pin Window Above
+ */
+void
+xmpl_window_pin_above(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_ABOVE");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Pin Window Bottom
+ */
+void
+xmpl_window_pin_below(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_BELOW");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Unpin Window
+ */
+void
+xmpl_window_unpin(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 0;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_ABOVE");
+	data[2] = xmpl_atom(conn, "_NET_WM_STATE_BELOW");
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Shade Window
+ */
+void
+xmpl_window_shade(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_FULLSCREEN");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Unshade Window
+ */
+void
+xmpl_window_unshade(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 0;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_FULLSCREEN");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
  * Fullscreen Window
  */
 void
@@ -252,6 +364,38 @@ xmpl_window_fullscreen(xcb_connection_t *conn, xcb_window_t win)
 
 	data[0] = 1;
 	data[1] = xmpl_atom(conn, "_NET_WM_STATE_FULLSCREEN");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Maximize Vertical Window
+ */
+void
+xmpl_window_maximize_vertical(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_VERT");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Maximize Horizontal Window
+ */
+void
+xmpl_window_maximize_horizontal(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_HORZ");
 	data[2] = 0;
 	data[3] = 1;
 
@@ -275,6 +419,22 @@ xmpl_window_maximize(xcb_connection_t *conn, xcb_window_t win)
 }
 
 /**
+ * Maximize Window
+ */
+void
+xmpl_window_minimize(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_VERT");
+	data[2] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_HORZ");
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
  * Restore Window
  */
 void
@@ -282,7 +442,7 @@ xmpl_window_restore(xcb_connection_t *conn, xcb_window_t win)
 {
 	u_int32_t data[4];
 
-	data[0] = 2;
+	data[0] = 0;
 	data[1] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_VERT");
 	data[2] = xmpl_atom(conn, "_NET_WM_STATE_MAXIMIZED_HORZ");
 	data[3] = 1;
@@ -290,7 +450,71 @@ xmpl_window_restore(xcb_connection_t *conn, xcb_window_t win)
 	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
 
 	data[1] = xmpl_atom(conn, "_NET_WM_STATE_FULLSCREEN");
-	data[2] = xmpl_atom(conn, "_NET_WM_STATE_SHADED");
+	data[2] = xmpl_atom(conn, "_NET_WM_STATE_HIDDEN");
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Exclude Window in Taskbar
+ */
+void
+xmpl_window_taskbar_exclude(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_SKIP_TASKBAR");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Include Window in Taskbar
+ */
+void
+xmpl_window_taskbar_include(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 0;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_SKIP_TASKBAR");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Exclude Window in Pager
+ */
+void
+xmpl_window_pager_exclude(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_SKIP_PAGER");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Include Window in Pager
+ */
+void
+xmpl_window_pager_include(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 0;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_SKIP_PAGER");
+	data[2] = 0;
+	data[3] = 1;
 
 	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
 }
