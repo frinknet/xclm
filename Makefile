@@ -8,8 +8,6 @@ SRC = \
 	window-class.c \
 	window-name.c \
 	window-rename.c \
-	window-focus.c \
-	window-kill.c \
 	window-nudge.c \
 	window-move.c \
 	window-morph.c \
@@ -44,6 +42,13 @@ SRC = \
 	window-maximize-vertical.c \
 	window-maximize-horizontal.c \
 	window-restore.c \
+	window-taskbar-exclude.c \
+	window-taskbar-include.c \
+	window-pager-exclude.c \
+	window-pager-include.c \
+	window-alert.c \
+	window-focus.c \
+	window-kill.c \
 	window-list-ignored.c \
 	window-list-managed.c \
 	window-list-visible.c \

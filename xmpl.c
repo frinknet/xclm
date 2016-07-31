@@ -520,6 +520,53 @@ xmpl_window_pager_include(xcb_connection_t *conn, xcb_window_t win)
 }
 
 /**
+ * Alert Window
+ */
+void
+xmpl_window_alert(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	data[0] = 1;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_DEMANDS_ATTENTION");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Focus Window
+ */
+void
+xmpl_window_focus(xcb_connection_t *conn, xcb_window_t win)
+{
+	u_int32_t data[4];
+
+	if (!xmpl_window_is_valid(conn, win)) {
+		return;
+	}
+
+	xcb_set_input_focus(conn, XCB_INPUT_FOCUS_POINTER_ROOT, win, XCB_CURRENT_TIME);
+
+	data[0] = 0;
+	data[1] = xmpl_atom(conn, "_NET_WM_STATE_DEMANDS_ATTENTION");
+	data[2] = 0;
+	data[3] = 1;
+
+	xmpl_window_set_atom(conn, win, "_NET_WM_STATE", XCB_ATOM_ATOM, data);
+}
+
+/**
+ * Kill Window
+ */
+void
+xmpl_window_kill(xcb_connection_t *conn, xcb_window_t win)
+{
+	xcb_kill_client(conn, win);
+}
+
+/**
  * Set Ignore for Window
  */
 void

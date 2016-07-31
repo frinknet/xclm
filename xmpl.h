@@ -142,12 +142,11 @@ void xmpl_window_taskbar_include(xcb_connection_t *conn, xcb_window_t win);
 void xmpl_window_pager_exclude(xcb_connection_t *conn, xcb_window_t win);
 void xmpl_window_pager_include(xcb_connection_t *conn, xcb_window_t win);
 
-void xmpl_window_attention(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_alert(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_focus(xcb_connection_t *conn, xcb_window_t win);
+void xmpl_window_kill(xcb_connection_t *conn, xcb_window_t win);
 
 xcb_window_t xmpl_window_current(xcb_connection_t *conn);
-
-xcb_atom_t xmpl_atom(xcb_connection_t *conn, char *atom_name);
-char *xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom_name);
 
 void xmpl_event_register(xcb_connection_t *conn, xcb_window_t win, uint32_t mask);
 void xmpl_event_watch(xcb_connection_t *conn, xcb_window_t root, char *event_dir, uint32_t mask);
@@ -156,4 +155,7 @@ void xmpl_event_spawn(xcb_window_t root, xcb_window_t win, char *cmd_path, int t
 
 void xmpl_pointer_center(xcb_connection_t *conn, xcb_window_t win);
 void xmpl_pointer_warp(xcb_connection_t *conn, xcb_window_t win, int x, int y);
+
+xcb_atom_t xmpl_atom(xcb_connection_t *conn, char *atom_name);
+char *xmpl_atom_name(xcb_connection_t *conn, xcb_atom_t atom_name);
 #endif
